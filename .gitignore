@@ -1,0 +1,4 @@
+.idea
+*.pyc
+.noseids
+local_certs.crt

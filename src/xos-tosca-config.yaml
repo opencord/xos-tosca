@@ -1,0 +1,6 @@
+name: xos-tosca
+grpc:
+  admin_username: "xosadmin@opencord.org"
+  admin_password: "rk1UYDHZXbu6KVCMkhmV"
+  secure_endpoint: "xos-core.opencord.org:50051"
+  insecure_endpoint: "xos-core.opencord.org:50055"
