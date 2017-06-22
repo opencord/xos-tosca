@@ -1,0 +1,31 @@
+map:
+  name:
+    type: str
+    required: True
+  grpc:
+    type: map
+    map:
+      admin_username:
+        type: str
+        required: True
+      admin_password:
+        type: str
+        required: True
+      secure_endpoint:
+        type: str
+        required: True
+      insecure_endpoint:
+        type: str
+        required: True
+  logging:
+    type: map
+    map:
+      logstash_hostport:
+        type: str
+      level:
+        type: str
+      channels:
+        type: seq
+        sequence:
+          - type: str
+            enum: ['file', 'console', 'elkstack']

@@ -1,0 +1,29 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+description: Persist xos-sample-gui-extension
+
+imports:
+   - custom_types/user.yaml
+   - custom_types/xosguiextension.yaml
+
+topology_template:
+  node_templates:
+
+    # UI Extension
+    test:
+      type: tosca.nodes.XOSGuiExtension
+      properties:
+        name: test
+        files: /spa/extensions/test/vendor.js, /spa/extensions/test/app.js
+
+    xosadmin@opencord.org:
+      type: tosca.nodes.User
+      properties:
+        password: rk1UYDHZXbu6KVCMkhmV
+        firstname: XOS
+        lastname: Admin
+#        is_admin: True
+#      requirements:
+#        - site:
+#            node: some
+#            relationship: tosca.relationships.MemberOfSite
