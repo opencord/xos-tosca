@@ -1,38 +1,34 @@
 from toscaparser.tosca_template import ToscaTemplate
 from default import TOSCA_RECIPES_DIR
-from resources import RESOURCES
-from grpc._channel import _Rendezvous
+from grpc_client.resources import RESOURCES
+from grpc_client.models_accessor import GRPCModelsAccessor
 
 class TOSCA_Parser:
 
-    def compute_dependencies(self):
-        nodetemplates_by_name = {}
-        for nodetemplate in self.template.nodetemplates:
-            nodetemplates_by_name[nodetemplate.name] = nodetemplate
-
-        self.nodetemplates_by_name = nodetemplates_by_name
-
-        for nodetemplate in self.template.nodetemplates:
+    def compute_dependencies(self, template, models_by_name):
+        """
+        NOTE this method is augmenting self.template, isn't there a more explicit way to achieve it?
+        """
+        for nodetemplate in template.nodetemplates:
             nodetemplate.dependencies = []
             nodetemplate.dependencies_names = []
             for reqs in nodetemplate.requirements:
                 for (k,v) in reqs.items():
                     name = v["node"]
-                    if (name in nodetemplates_by_name):
-                        nodetemplate.dependencies.append(nodetemplates_by_name[name])
+                    if (name in models_by_name):
+                        nodetemplate.dependencies.append(models_by_name[name])
                         nodetemplate.dependencies_names.append(name)
 
                     # go another level deep, as our requirements can have requirements...
                     for sd_req in v.get("requirements",[]):
                         for (sd_req_k, sd_req_v) in sd_req.items():
                             name = sd_req_v["node"]
-                            if (name in nodetemplates_by_name):
-                                nodetemplate.dependencies.append(nodetemplates_by_name[name])
+                            if (name in models_by_name):
+                                nodetemplate.dependencies.append(models_by_name[name])
                                 nodetemplate.dependencies_names.append(name)
 
-    def topsort_dependencies(self):
-        # stolen from observer
-        g = self.nodetemplates_by_name
+    @staticmethod
+    def topsort_dependencies(g):
 
         # Get set of all nodes, including those without outgoing edges
         keys = set(g.keys())
@@ -80,53 +76,11 @@ class TOSCA_Parser:
         noorder = list(set(steps) - set(order))
         return order + noorder
 
-    def execute(self):
-        for nodetemplate in self.ordered_nodetemplates:
-            self.execute_nodetemplate(nodetemplate)
-
-    def execute_nodetemplate(self, nodetemplate):
-        node_class = nodetemplate.type.replace("tosca.nodes.", "")
-        if node_class not in RESOURCES:
-            raise Exception("Nodetemplate %s's type %s is not a known resource" % (nodetemplate.name, node_class))
-
-        # find the class corresponding to a node
-        cls = RESOURCES[node_class]
-
-
-        # read properties from TOSCA
-        data = nodetemplate.templates[nodetemplate.name]['properties']
-
-        TOSCA_Parser.creat_or_update(cls, data)
-
     @staticmethod
     def populate_model(model, data):
         for k,v in data.iteritems():
             setattr(model, k, v)
         return model
-
-    @staticmethod
-    def creat_or_update(cls, data):
-
-        # default case
-        if data.get('name'):
-            used_key = 'name'
-        else:
-            used_key = data.keys()[0]
-
-        models = cls.objects.filter(**{used_key: data[used_key]})
-
-        if len(models) == 1:
-            print "[XOS-Tosca] Model %s already exist, updating..." % data[used_key]
-            model = models[0]
-        elif len(models) == 0:
-            model = cls.objects.new()
-            print "[XOS-Tosca] Model %s is new, creating..." % data[used_key]
-        else:
-            raise Exception("[XOS-Tosca] Model %s has multiple instances, I can't handle it" % data[used_key])
-
-        model = TOSCA_Parser.populate_model(model, data)
-        model.save()
-
 
     @staticmethod
     def _translate_exception(msg):
@@ -141,36 +95,74 @@ class TOSCA_Parser:
         else:
             return msg
 
-    def __init__(self, recipe):
-
-        self.template = None
-        self.nodetemplates_by_name = None
-        self.ordered_nodetemplates = []
-        self.ordered_names = None
-
-        tmp_file_path = TOSCA_RECIPES_DIR + '/tmp.yaml'
-
-        # write the receive recipe in a tmp file
-        tmp_file = open(tmp_file_path, 'w')
+    def save_recipe_to_tmp_file(self, recipe):
+        tmp_file = open(self.recipe_file, 'w')
         tmp_file.write(recipe)
         tmp_file.close()
 
-        try:
-            self.template = ToscaTemplate(tmp_file_path)
-            self.compute_dependencies()
-            self.ordered_names = self.topsort_dependencies()
-            for name in self.ordered_names:
-                if name in self.nodetemplates_by_name:
-                    self.ordered_nodetemplates.append(self.nodetemplates_by_name[name])
+    @staticmethod
+    def get_tosca_models_by_name(template):
+        models_by_name = {}
+        for node in template.nodetemplates:
+            models_by_name[node.name] = node
+        return models_by_name
 
-            self.execute()
+    @staticmethod
+    def get_ordered_models_template(ordered_models_name, templates_by_model_name):
+        ordered_models_templates = []
+        for name in ordered_models_name:
+            if name in templates_by_model_name:
+                ordered_models_templates.append(templates_by_model_name[name])
+        return ordered_models_templates
+
+
+    def __init__(self, recipe):
+
+        # the template returned by TOSCA-Parser
+        self.template = None
+        # dictionary containing the models in the recipe and their template
+        self.templates_by_model_name = None
+        # list of models ordered by requirements
+        self.ordered_models_name = None
+
+        self.ordered_models_template = []
+        self.recipe_file = TOSCA_RECIPES_DIR + '/tmp.yaml'
+
+        try:
+            # [] save the recipe to a tmp file
+            self.save_recipe_to_tmp_file(recipe)
+            # [] parse the recipe with TOSCA Parse
+            self.template = ToscaTemplate(self.recipe_file)
+            # [] get all models in the recipe
+            self.templates_by_model_name = self.get_tosca_models_by_name(self.template)
+            # [] compute requirements
+            self.compute_dependencies(self.template, self.templates_by_model_name)
+            # [] topsort requirements
+            self.ordered_models_name = self.topsort_dependencies(self.templates_by_model_name)
+            # [] topsort templates
+            self.ordered_models_template = self.get_ordered_models_template(self.ordered_models_name, self.templates_by_model_name)
+
+            for recipe in self.ordered_models_template:
+                # get properties from tosca
+                data = recipe.templates[recipe.name]['properties']
+                # [] get model by class name
+                class_name = recipe.type.replace("tosca.nodes.", "")
+                if class_name not in RESOURCES:
+                    raise Exception("Nodetemplate %s's type %s is not a known resource" % (recipe.name, class_name))
+                model = GRPCModelsAccessor.get_model_from_classname(class_name, data)
+                # [] populate model with data
+                model = self.populate_model(model, data)
+                # [] check if the model has requirements
+                # [] if it has populate them
+                # [] save or update
+                model.save()
 
         except Exception as e:
             print e
-            import sys, os
-            exc_type, exc_obj, exc_tb = sys.exc_info()
-            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-            print(exc_type, fname, exc_tb.tb_lineno)
-            raise Exception(self._translate_exception(e.message))
+            if e.message:
+                exception_msg = e.message
+            else:
+                exception_msg = str(e)
+            raise Exception(exception_msg)
 
 
