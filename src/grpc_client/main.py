@@ -1,7 +1,7 @@
 import functools
 from xosapi.xos_grpc_client import SecureClient, InsecureClient
 from twisted.internet import reactor, defer
-from tosca.resources import RESOURCES
+from resources import RESOURCES
 from xosconfig import Config
 
 LOCAL_CERT = '/Users/teone/Sites/opencord/orchestration/xos-tosca/local_certs.crt'

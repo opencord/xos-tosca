@@ -4,7 +4,10 @@ node_types:
 {% for m in proto.messages %}
     tosca.nodes.{{ m.name }}:
         derived_from: tosca.nodes.Root
-        description: {{ m.name }}
+        description: {% if m.options.tosca_description -%}{{ m.options.tosca_description}}{% else%}"An XOS {{ m.name }}"{%- endif %}
+        capabilities:
+            {{ m.name|lower }}:
+                type: tosca.capabilities.xos.{{ m.name }}
         properties:
             no-delete:
                 type: boolean
@@ -22,10 +25,29 @@ node_types:
                 type: string
                 required: false
                 descrption: Replaces/renames this object
-            {%- for f in m.fields %}
+            {% for f in m.fields %}
+            {%- if not f.link -%}
             {{ f.name }}:
-                type: {{ f.type }}
+                type: {{ xproto_tosca_field_type(f.type) }}
                 required: {{ xproto_tosca_required(f.options.null, f.options.blank, f.options.default) }}
                 description: {{ f.options.help_text }}
+            {% endif %}
             {%- endfor %}
+
+    {% for l in m.links %}
+    {%- if l.link_type == "manytoone" -%}
+    tosca.relationships.BelongsToOne:
+        derived_from: tosca.relationships.Root
+        valid_target_types: [ tosca.capabilities.xos.{{ l.peer.name }} ]
+    {%- endif%}
+    {%- if l.link_type == "manytomany" -%}
+    tosca.relationships.BelongsToMany:
+        derived_from: tosca.relationships.Root
+        valid_target_types: [ tosca.capabilities.xos.{{ l.peer.name }} ]
+    {%- endif%}
+    {% endfor %}
+
+    tosca.capabilities.xos.{{ m.name }}:
+        derived_from: tosca.capabilities.Root
+        description: {{ m.name }}
 {%- endfor %}

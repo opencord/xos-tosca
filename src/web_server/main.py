@@ -22,7 +22,8 @@ class TOSCA_WebServer:
             try:
                 # print request.headers['xos-password']
                 parsed = TOSCA_Parser(request.get_data())
-                return make_response(str(parsed.ordered_names), 201)
+                response_text = "Created models: %s" % str(parsed.ordered_models_name)
+                return make_response(response_text, 201)
             except Exception, e:
                 return make_response(e.message, 400)
 

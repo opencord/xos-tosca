@@ -2,3 +2,8 @@
 *.pyc
 .noseids
 local_certs.crt
+
+# Test Coverage
+.coverage
+cover
+coverage.xml
