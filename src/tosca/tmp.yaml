@@ -29,6 +29,8 @@ topology_template:
     test@opencord.org:
       type: tosca.nodes.User
       properties:
+        username: test@opencord.org
+        email: test@opencord.org
         password: mypwd
         firstname: User
         lastname: Test
