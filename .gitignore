@@ -2,6 +2,7 @@
 *.pyc
 .noseids
 local_certs.crt
+src/tosca/tmp.yaml
 
 # Test Coverage
 .coverage
