@@ -1,3 +1,5 @@
+# NOTE in a deployment I'm overridden by platform install
+
 name: xos-tosca
 grpc:
   secure_endpoint: "xos-core.opencord.org:50051"
