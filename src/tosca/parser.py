@@ -115,6 +115,13 @@ class TOSCA_Parser:
                 ordered_models_templates.append(templates_by_model_name[name])
         return ordered_models_templates
 
+    @staticmethod
+    def populate_dependencies(model, requirements, saved_models):
+        for dep in requirements:
+            class_name = dep.keys()[0]
+            related_model = saved_models[dep[class_name]['node']]
+            setattr(model, "%s_id" % class_name, related_model.id)
+        return model
 
     def __init__(self, recipe):
 
@@ -124,6 +131,8 @@ class TOSCA_Parser:
         self.templates_by_model_name = None
         # list of models ordered by requirements
         self.ordered_models_name = None
+        # dictionary containing the saved model
+        self.saved_model_by_name = {}
 
         self.ordered_models_template = []
         self.recipe_file = TOSCA_RECIPES_DIR + '/tmp.yaml'
@@ -150,12 +159,15 @@ class TOSCA_Parser:
                 if class_name not in RESOURCES:
                     raise Exception("Nodetemplate %s's type %s is not a known resource" % (recipe.name, class_name))
                 model = GRPCModelsAccessor.get_model_from_classname(class_name, data)
-                # [] populate model with data
+                # [] populate model with data[[
                 model = self.populate_model(model, data)
                 # [] check if the model has requirements
                 # [] if it has populate them
+                model = self.populate_dependencies(model, recipe.requirements, self.saved_model_by_name)
                 # [] save or update
                 model.save()
+
+                self.saved_model_by_name[recipe.name] = model
 
         except Exception as e:
             print e

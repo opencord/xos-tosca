@@ -18,7 +18,7 @@ topology_template:
         files: /spa/extensions/test/vendor.js, /spa/extensions/test/app.js
 
     # Site
-    onlab:
+    site_onlab:
       type: tosca.nodes.Site
       properties:
         name: Open Networking Lab
@@ -26,14 +26,16 @@ topology_template:
         hosts_nodes: True
 
     # User
-    test@opencord.org:
+    user_test:
       type: tosca.nodes.User
       properties:
+        username: test@opencord.org
+        email: test@opencord.org
         password: mypwd
         firstname: User
         lastname: Test
         is_admin: True
       requirements:
         - site:
-            node: onlab
+            node: site_onlab
             relationship: tosca.relationships.BelongsToOne
