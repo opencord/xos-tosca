@@ -20,6 +20,7 @@ class TOSCA_Parser:
                         nodetemplate.dependencies_names.append(name)
 
                     # go another level deep, as our requirements can have requirements...
+                    # NOTE do we still need to go deep?
                     for sd_req in v.get("requirements",[]):
                         for (sd_req_k, sd_req_v) in sd_req.items():
                             name = sd_req_v["node"]
@@ -86,7 +87,6 @@ class TOSCA_Parser:
     def _translate_exception(msg):
         readable = []
         for line in msg.splitlines():
-            print line
             if line.strip().startswith('MissingRequiredFieldError'):
                 readable.append(line)
 
@@ -130,16 +130,19 @@ class TOSCA_Parser:
         # dictionary containing the models in the recipe and their template
         self.templates_by_model_name = None
         # list of models ordered by requirements
-        self.ordered_models_name = None
+        self.ordered_models_name = []
         # dictionary containing the saved model
         self.saved_model_by_name = {}
 
         self.ordered_models_template = []
         self.recipe_file = TOSCA_RECIPES_DIR + '/tmp.yaml'
 
+        self.recipe = recipe
+
+    def execute(self):
         try:
             # [] save the recipe to a tmp file
-            self.save_recipe_to_tmp_file(recipe)
+            self.save_recipe_to_tmp_file(self.recipe)
             # [] parse the recipe with TOSCA Parse
             self.template = ToscaTemplate(self.recipe_file)
             # [] get all models in the recipe

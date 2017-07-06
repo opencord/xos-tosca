@@ -1,4 +1,5 @@
 import unittest
+import os
 from tosca.parser import TOSCA_Parser
 
 class TOSCA_Parser_Test(unittest.TestCase):
@@ -16,12 +17,14 @@ class TOSCA_Parser_Test(unittest.TestCase):
                 FakeNode('model1'),
                 FakeNode('model2')
             ]
-            pass
 
 
         res = TOSCA_Parser.get_tosca_models_by_name(FakeTemplate)
         self.assertIsInstance(res['model1'], FakeNode)
         self.assertIsInstance(res['model2'], FakeNode)
+
+        self.assertEqual(res['model1'].name, 'model1')
+        self.assertEqual(res['model2'].name, 'model2')
 
     def test_populate_dependencies(self):
         """
@@ -50,3 +53,128 @@ class TOSCA_Parser_Test(unittest.TestCase):
 
         model = TOSCA_Parser.populate_dependencies(FakeModel, FakeRecipe.requirements, saved_models)
         self.assertEqual(model.site_id, 1)
+
+    def test_get_ordered_models_template(self):
+        """
+        [TOSCA_Parser] get_ordered_models_template: Create a list of templates based on topsorted models
+        """
+        ordered_models = ['foo', 'bar']
+
+        templates = {
+            'foo': 'foo_template',
+            'bar': 'bar_template'
+        }
+
+        ordered_templates = TOSCA_Parser.get_ordered_models_template(ordered_models, templates)
+
+        self.assertEqual(ordered_templates[0], 'foo_template')
+        self.assertEqual(ordered_templates[1], 'bar_template')
+
+    def test_topsort_dependencies(self):
+        """
+        [TOSCA_Parser] topsort_dependencies: Create a list of models based on dependencies
+        """
+        class FakeTemplate:
+            def __init__(self, name, deps):
+                self.name = name
+                self.dependencies_names =  deps
+
+
+        templates = {
+            'deps': FakeTemplate('deps', ['main']),
+            'main': FakeTemplate('main', []),
+        }
+
+        sorted = TOSCA_Parser.topsort_dependencies(templates)
+
+        self.assertEqual(sorted[0], 'main')
+        self.assertEqual(sorted[1], 'deps')
+
+    def test_compute_dependencies(self):
+        """
+        [TOSCA_Parser] compute_dependencies: augment the TOSCA nodetemplate with information on requirements (aka related models)
+        """
+
+        parser = TOSCA_Parser('')
+
+        class FakeNode:
+            def __init__(self, name, requirements):
+                self.name = name
+                self.requirements = requirements
+
+        main = FakeNode('main', [])
+        dep = FakeNode('dep', [{'relation': {'node': 'main'}}])
+
+        models_by_name = {
+            'main': main,
+            'dep': dep
+        }
+
+        class FakeTemplate:
+            nodetemplates = [dep, main]
+
+        parser.compute_dependencies(FakeTemplate, models_by_name)
+
+        templates = FakeTemplate.nodetemplates
+        augmented_dep = templates[0]
+        augmented_main = templates[1]
+
+        self.assertIsInstance(augmented_dep.dependencies[0], FakeNode)
+        self.assertEqual(augmented_dep.dependencies[0].name, 'main')
+        self.assertEqual(augmented_dep.dependencies_names[0], 'main')
+
+        self.assertEqual(len(augmented_main.dependencies), 0)
+        self.assertEqual(len(augmented_main.dependencies_names), 0)
+
+    def test_populate_model(self):
+        """
+        [TOSCA_Parser] populate_model: augment the GRPC model with data from TOSCA
+        """
+        class FakeModel:
+            pass
+
+        data = {
+            'name': 'test',
+            'foo': 'bar',
+            'number': 1
+        }
+
+        model = TOSCA_Parser.populate_model(FakeModel, data)
+
+        self.assertEqual(model.name, 'test')
+        self.assertEqual(model.foo, 'bar')
+        self.assertEqual(model.number, 1)
+
+    def test_translate_exception(self):
+        """
+        [TOSCA_Parser] translate_exception: convert a TOSCA Parser exception in a user readable string
+        """
+        e = TOSCA_Parser._translate_exception("Non tosca exception")
+        self.assertEqual(e, "Non tosca exception")
+
+        e = TOSCA_Parser._translate_exception("""        
+MissingRequiredFieldError: some message
+    followed by unreadable
+    and mystic
+        python error
+        starting at line
+            38209834 of some file
+        """)
+        self.assertEqual(e, "MissingRequiredFieldError: some message")
+
+    def test_save_recipe_to_tmp_file(self):
+        """
+        [TOSCA_Parser] save_recipe_to_tmp_file: should save a TOSCA recipe to a tmp file
+        """
+        parser = TOSCA_Parser('')
+        parser.recipe_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_tmp.yaml')
+
+        parser.save_recipe_to_tmp_file('my tosca')
+
+        self.assertTrue(os.path.exists(parser.recipe_file))
+
+        content = open(parser.recipe_file).read()
+
+        self.assertEqual(content, 'my tosca')
+
+        os.remove(parser.recipe_file)
