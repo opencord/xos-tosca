@@ -131,3 +131,51 @@ topology_template:
         saved_user = parser.saved_model_by_name['user_test']
         self.assertEqual(saved_user.firstname, 'User')
         self.assertEqual(saved_user.site_id, 1)
+
+    @patch.dict(RESOURCES, mock_resources, clear=True)
+    @patch.object(FakeSite.objects, 'filter', MagicMock(return_value=[FakeModel]))
+    @patch.object(FakeUser.objects, 'filter', MagicMock(return_value=[FakeModel]))
+    @patch.object(FakeModel, 'save')
+    def test_no_update(self, mock_save):
+        """
+        [TOSCA_Parser] Should not save a model with 'no-update' but should retrieve it
+        """
+        recipe = """
+        tosca_definitions_version: tosca_simple_yaml_1_0
+
+        description: Create a new site with one user
+
+        imports:
+           - custom_types/user.yaml
+           - custom_types/site.yaml
+
+        topology_template:
+          node_templates:
+
+            # Site
+            site_onlab:
+              type: tosca.nodes.Site
+              properties:
+                no-save: True
+
+            # User
+            user_test:
+              type: tosca.nodes.User
+              properties:
+                username: test@opencord.org
+                email: test@opencord.org
+                password: mypwd
+                firstname: User
+                lastname: Test
+                is_admin: True
+              requirements:
+                - site:
+                    node: site_onlab
+                    relationship: tosca.relationships.BelongsToOne
+        """
+
+        parser = TOSCA_Parser(recipe)
+
+        parser.execute()
+
+        self.assertEqual(mock_save.call_count, 1)

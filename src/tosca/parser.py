@@ -1,4 +1,4 @@
-from toscaparser.tosca_template import ToscaTemplate
+from toscaparser.tosca_template import ToscaTemplate, ValidationError
 from default import TOSCA_RECIPES_DIR
 from grpc_client.resources import RESOURCES
 from grpc_client.models_accessor import GRPCModelsAccessor
@@ -79,8 +79,10 @@ class TOSCA_Parser:
 
     @staticmethod
     def populate_model(model, data):
+        # TODO remove 'no-save' ecc
         for k,v in data.iteritems():
-            setattr(model, k, v)
+            if k not in ['no-save']:
+                setattr(model, k, v)
         return model
 
     @staticmethod
@@ -88,6 +90,8 @@ class TOSCA_Parser:
         readable = []
         for line in msg.splitlines():
             if line.strip().startswith('MissingRequiredFieldError'):
+                readable.append(line)
+            if line.strip().startswith('UnknownFieldError'):
                 readable.append(line)
 
         if len(readable) > 0:
@@ -162,22 +166,27 @@ class TOSCA_Parser:
                 if class_name not in RESOURCES:
                     raise Exception("Nodetemplate %s's type %s is not a known resource" % (recipe.name, class_name))
                 model = GRPCModelsAccessor.get_model_from_classname(class_name, data)
-                # [] populate model with data[[
+                # [] populate model with data
+                print data
                 model = self.populate_model(model, data)
                 # [] check if the model has requirements
                 # [] if it has populate them
                 model = self.populate_dependencies(model, recipe.requirements, self.saved_model_by_name)
                 # [] save or update
-                model.save()
+
+                # If the model has not the attribute no-save (or is false)
+                if 'no-save' not in data or ('no-save' in data and data['no-save'] is False):
+                    model.save()
+                else:
+                    print "Model %s not saved because of 'no-save'"
 
                 self.saved_model_by_name[recipe.name] = model
 
-        except Exception as e:
-            print e
+        except ValidationError as e:
             if e.message:
-                exception_msg = e.message
+                exception_msg = TOSCA_Parser._translate_exception(e.message)
             else:
-                exception_msg = str(e)
+                exception_msg = TOSCA_Parser._translate_exception(str(e))
             raise Exception(exception_msg)
 
 
