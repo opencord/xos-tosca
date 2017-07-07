@@ -31,7 +31,7 @@ class GRPCModelsAccessor_Create_or_update_Test(unittest.TestCase):
         }
         with self.assertRaises(Exception) as e:
             GRPCModelsAccessor.get_model_from_classname('i-do-not-exists', data)
-        self.assertEqual(e.exception.message, "[XOS-TOSCA] The model your tring to create (name: test, class: i-do-not-exists) is not know by xos-core")
+        self.assertEqual(e.exception.message, "[XOS-TOSCA] The model you are trying to create (name: test, class: i-do-not-exists) is not know by xos-core")
 
     @patch.object(FakeResource.objects, "filter")
     @patch.object(FakeResource.objects, "new", MagicMock(return_value=FakeModel))
