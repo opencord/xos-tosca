@@ -1,0 +1,12 @@
+<!doctype html>
+<title>Hello from Flask</title>
+
+<ul>
+{% for def in types %}
+    <li>
+        <a href="/custom_type/{{ def }}">
+            {{ def }}
+        </a>
+    </li>
+{% endfor %}
+</ul>
