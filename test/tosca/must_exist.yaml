@@ -1,0 +1,33 @@
+tosca_definitions_version: tosca_simple_yaml_1_0
+
+description: Persist xos-sample-gui-extension
+
+imports:
+   - custom_types/user.yaml
+   - custom_types/site.yaml
+   - custom_types/xosguiextension.yaml
+
+topology_template:
+  node_templates:
+
+    # Site
+    site_onlab:
+      type: tosca.nodes.Site
+      properties:
+        name: Open Networking Lab
+        must-exist: True
+
+    # User
+    user_test:
+      type: tosca.nodes.User
+      properties:
+        username: test@opencord.org
+        email: test@opencord.org
+        password: mypwd
+        firstname: User
+        lastname: Test
+        is_admin: True
+      requirements:
+        - site:
+            node: site_onlab
+            relationship: tosca.relationships.BelongsToOne

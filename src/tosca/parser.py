@@ -1,4 +1,4 @@
-from toscaparser.tosca_template import ToscaTemplate
+from toscaparser.tosca_template import ToscaTemplate, ValidationError
 from default import TOSCA_RECIPES_DIR
 from grpc_client.resources import RESOURCES
 from grpc_client.models_accessor import GRPCModelsAccessor
@@ -89,6 +89,8 @@ class TOSCA_Parser:
         for line in msg.splitlines():
             if line.strip().startswith('MissingRequiredFieldError'):
                 readable.append(line)
+            if line.strip().startswith('UnknownFieldError'):
+                readable.append(line)
 
         if len(readable) > 0:
             return '/n'.join(readable)
@@ -162,7 +164,7 @@ class TOSCA_Parser:
                 if class_name not in RESOURCES:
                     raise Exception("Nodetemplate %s's type %s is not a known resource" % (recipe.name, class_name))
                 model = GRPCModelsAccessor.get_model_from_classname(class_name, data)
-                # [] populate model with data[[
+                # [] populate model with data
                 model = self.populate_model(model, data)
                 # [] check if the model has requirements
                 # [] if it has populate them
@@ -172,12 +174,11 @@ class TOSCA_Parser:
 
                 self.saved_model_by_name[recipe.name] = model
 
-        except Exception as e:
-            print e
+        except ValidationError as e:
             if e.message:
-                exception_msg = e.message
+                exception_msg = TOSCA_Parser._translate_exception(e.message)
             else:
-                exception_msg = str(e)
+                exception_msg = TOSCA_Parser._translate_exception(str(e))
             raise Exception(exception_msg)
 
 
