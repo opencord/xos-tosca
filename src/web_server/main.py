@@ -1,7 +1,9 @@
-from tosca.parser import TOSCA_Parser
 from grpc_client.main import GRPC_Client
 from klein import Klein
-import functools
+import os
+from tosca.parser import TOSCA_Parser
+from tosca.default import TOSCA_DEFS_DIR
+import json
 
 BANNER = """
    _  ______  _____    __________  _____ _________ 
@@ -12,6 +14,9 @@ BANNER = """
 """
 
 class TOSCA_WebServer:
+
+    current_dir = os.path.dirname(os.path.realpath(__file__))
+    template_dir = os.path.join(current_dir, 'templates/')
 
     app = Klein()
 
@@ -25,7 +30,14 @@ class TOSCA_WebServer:
 
     @app.route('/', methods=['GET'])
     def index(self, request):
-        return BANNER
+        request.responseHeaders.addRawHeader(b"content-type", b"application/json")
+        tosca_defs = [f for f in os.listdir(TOSCA_DEFS_DIR) if not f.startswith('.')]
+
+        response = {}
+        for d in tosca_defs:
+            name = d.replace('.yaml', '')
+            response[name] = "/custom_type/%s" % name
+        return json.dumps(response)
 
     @app.route('/run', methods=['POST'])
     def execute(self, request):
@@ -38,6 +50,12 @@ class TOSCA_WebServer:
         self.parser = TOSCA_Parser(recipe, username, password)
         d.addCallback(self.execute_tosca)
         return d
+
+    @app.route("/custom_type/<name>")
+    def custom_type(self, request, name):
+        request.responseHeaders.addRawHeader(b"content-type", b"text/plain")
+        custom_type = open(TOSCA_DEFS_DIR + '/' + name + '.yaml').read()
+        return custom_type
 
     def __init__(self):
         self.app.run('localhost', '9200')
