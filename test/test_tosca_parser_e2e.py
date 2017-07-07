@@ -131,3 +131,36 @@ topology_template:
         saved_user = parser.saved_model_by_name['user_test']
         self.assertEqual(saved_user.firstname, 'User')
         self.assertEqual(saved_user.site_id, 1)
+
+    @patch.dict(RESOURCES, mock_resources, clear=True)
+    @patch.object(FakeSite.objects, 'filter', MagicMock(return_value=[]))
+    def test_must_exist_fail(self):
+        """
+        [TOSCA_Parser] Should throw an error if an object with 'must_exist' does not exist
+        """
+        recipe = """
+        tosca_definitions_version: tosca_simple_yaml_1_0
+
+        description: Create a new site with one user
+
+        imports:
+           - custom_types/user.yaml
+           - custom_types/site.yaml
+
+        topology_template:
+          node_templates:
+
+            # Site
+            site_onlab:
+              type: tosca.nodes.Site
+              properties:
+                name: Open Networking Lab
+                must-exist: True
+        """
+
+        parser = TOSCA_Parser(recipe)
+
+        with self.assertRaises(Exception) as e:
+            parser.execute()
+
+        self.assertEqual(e.exception.message, "[XOS-TOSCA] Model Site:Open Networking Lab has property 'must-exist' but cannot be found")
