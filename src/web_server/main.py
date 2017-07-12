@@ -1,5 +1,7 @@
-from flask import Flask, make_response, request
 from tosca.parser import TOSCA_Parser
+from grpc_client.main import GRPC_Client
+from klein import Klein
+import functools
 
 BANNER = """
    _  ______  _____    __________  _____ _________ 
@@ -10,23 +12,32 @@ BANNER = """
 """
 
 class TOSCA_WebServer:
-    app = Flask('TOSCA-Web-Server')
 
-    @app.route("/", methods=['GET', 'POST'])
-    def home():
-        if request.method == 'GET':
-            response =  make_response(BANNER)
-            response.headers["content-type"] = "text/plain"
-            return response
-        else:
-            try:
-                # print request.headers['xos-password']
-                parser = TOSCA_Parser(request.get_data())
-                parser.execute()
-                response_text = "Created models: %s" % str(parser.ordered_models_name)
-                return make_response(response_text, 201)
-            except Exception, e:
-                return make_response(e.message, 400)
+    app = Klein()
+
+    def execute_tosca(self, recipe):
+        try:
+            self.parser.execute()
+            response_text = "Created models: %s" % str(self.parser.ordered_models_name)
+            return response_text
+        except Exception, e:
+            return e.message
+
+    @app.route('/', methods=['GET'])
+    def index(self, request):
+        return BANNER
+
+    @app.route('/run', methods=['POST'])
+    def execute(self, request):
+        recipe = request.content.read()
+        headers = request.getAllHeaders()
+        username = headers['xos-username']
+        password = headers['xos-password']
+
+        d = GRPC_Client().create_secure_client(username, password, recipe)
+        self.parser = TOSCA_Parser(recipe, username, password)
+        d.addCallback(self.execute_tosca)
+        return d
 
     def __init__(self):
-        self.app.run(host='localhost', port='9200')
+        self.app.run('localhost', '9200')
