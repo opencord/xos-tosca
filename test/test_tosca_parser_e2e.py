@@ -20,7 +20,11 @@ class FakeSite:
 class FakeUser:
     objects = FakeObj
 
-mock_resources = {
+USERNAME = "username"
+PASSWORD = "pass"
+
+mock_resources = {}
+mock_resources["%s~%s" % (USERNAME, PASSWORD)] = {
     'XOSGuiExtension': FakeGuiExt,
     'Site': FakeSite,
     'User': FakeUser
@@ -54,7 +58,7 @@ topology_template:
         files: /spa/extensions/test/vendor.js, /spa/extensions/test/app.js
 """
 
-        parser = TOSCA_Parser(recipe)
+        parser = TOSCA_Parser(recipe, USERNAME, PASSWORD)
 
         parser.execute()
 
@@ -114,7 +118,7 @@ topology_template:
             relationship: tosca.relationships.BelongsToOne
 """
 
-        parser = TOSCA_Parser(recipe)
+        parser = TOSCA_Parser(recipe, USERNAME, PASSWORD)
 
         parser.execute()
 
@@ -158,7 +162,7 @@ topology_template:
                 must-exist: True
         """
 
-        parser = TOSCA_Parser(recipe)
+        parser = TOSCA_Parser(recipe, USERNAME, PASSWORD)
 
         with self.assertRaises(Exception) as e:
             parser.execute()

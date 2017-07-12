@@ -6,7 +6,7 @@ class GRPCModelsAccessor:
     """
 
     @staticmethod
-    def get_model_from_classname(class_name, data):
+    def get_model_from_classname(class_name, data, username, password):
         """
         Give a Model Class Name and some data, check if that exits or instantiate a new one
         """
@@ -16,10 +16,13 @@ class GRPCModelsAccessor:
         else:
             used_key = data.keys()[0]
 
-        if class_name not in RESOURCES:
+        key = "%s~%s" % (username, password)
+        if not key in RESOURCES:
+            raise Exception("[XOS-TOSCA] User '%s' does not have ready resources" % username)
+        if class_name not in RESOURCES[key]:
             raise Exception('[XOS-TOSCA] The model you are trying to create (%s: %s, class: %s) is not know by xos-core' % (used_key, data[used_key], class_name))
 
-        cls = RESOURCES[class_name]
+        cls = RESOURCES[key][class_name]
         models = cls.objects.filter(**{used_key: data[used_key]})
 
         if len(models) == 1:

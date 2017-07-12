@@ -95,7 +95,7 @@ class TOSCA_Parser_Test(unittest.TestCase):
         [TOSCA_Parser] compute_dependencies: augment the TOSCA nodetemplate with information on requirements (aka related models)
         """
 
-        parser = TOSCA_Parser('')
+        parser = TOSCA_Parser('', 'user', 'pass')
 
         class FakeNode:
             def __init__(self, name, requirements):
@@ -166,7 +166,7 @@ MissingRequiredFieldError: some message
         """
         [TOSCA_Parser] save_recipe_to_tmp_file: should save a TOSCA recipe to a tmp file
         """
-        parser = TOSCA_Parser('')
+        parser = TOSCA_Parser('', 'user', 'pass')
         parser.recipe_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_tmp.yaml')
 
         parser.save_recipe_to_tmp_file('my tosca')

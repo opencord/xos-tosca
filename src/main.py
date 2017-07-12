@@ -2,7 +2,7 @@ import os
 from grpc_client.main import GRPC_Client
 from tosca.generator import TOSCA_Generator
 from web_server.main import TOSCA_WebServer
-from twisted.internet import reactor, defer
+from twisted.internet import defer
 from xosconfig import Config
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
@@ -21,7 +21,6 @@ class Main:
 
         TOSCA_Generator().generate(client)
 
-        reactor.callLater(0, TOSCA_WebServer)
 
         return deferred
 
@@ -31,7 +30,8 @@ class Main:
         grpc_setup = GRPC_Client().start()
         grpc_setup.addCallback(self.generate_tosca)
 
-        reactor.run()
+        # NOTE that TOSCA_WebServer create a Klein app that call reactor.run()
+        TOSCA_WebServer()
 
 
 if __name__ == '__main__':

@@ -2,6 +2,8 @@ from toscaparser.tosca_template import ToscaTemplate, ValidationError
 from default import TOSCA_RECIPES_DIR
 from grpc_client.resources import RESOURCES
 from grpc_client.models_accessor import GRPCModelsAccessor
+from grpc._channel import _Rendezvous
+import json
 
 class TOSCA_Parser:
 
@@ -125,7 +127,11 @@ class TOSCA_Parser:
             setattr(model, "%s_id" % class_name, related_model.id)
         return model
 
-    def __init__(self, recipe):
+    def __init__(self, recipe, username, password):
+
+        # store username/password combination to read resources
+        self.username = username
+        self.password = password
 
         # the template returned by TOSCA-Parser
         self.template = None
@@ -161,9 +167,7 @@ class TOSCA_Parser:
                 data = recipe.templates[recipe.name]['properties']
                 # [] get model by class name
                 class_name = recipe.type.replace("tosca.nodes.", "")
-                if class_name not in RESOURCES:
-                    raise Exception("Nodetemplate %s's type %s is not a known resource" % (recipe.name, class_name))
-                model = GRPCModelsAccessor.get_model_from_classname(class_name, data)
+                model = GRPCModelsAccessor.get_model_from_classname(class_name, data, self.username, self.password)
                 # [] populate model with data
                 model = self.populate_model(model, data)
                 # [] check if the model has requirements
@@ -180,5 +184,14 @@ class TOSCA_Parser:
             else:
                 exception_msg = TOSCA_Parser._translate_exception(str(e))
             raise Exception(exception_msg)
+
+        except _Rendezvous, e:
+            try:
+                exception_msg = json.loads(e._state.details)["error"]
+            except Exception:
+                exception_msg = e._state.details
+            raise Exception(exception_msg)
+        except Exception, e:
+            raise e
 
 
