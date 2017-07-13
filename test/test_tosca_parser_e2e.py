@@ -9,6 +9,8 @@ class FakeObj:
 
 class FakeModel:
     save = None
+    delete = None
+    is_new = False
     id = 1
 
 class FakeGuiExt:
@@ -72,6 +74,42 @@ topology_template:
         saved_model = parser.saved_model_by_name['test']
         self.assertEqual(saved_model.name, 'test')
         self.assertEqual(saved_model.files, '/spa/extensions/test/vendor.js, /spa/extensions/test/app.js')
+
+    @patch.dict(RESOURCES, mock_resources, clear=True)
+    @patch.object(FakeGuiExt.objects, 'filter', MagicMock(return_value=[FakeModel]))
+    @patch.object(FakeModel, 'delete')
+    def test_basic_deletion(self, mock_delete):
+        """
+        [TOSCA_Parser] Should delete models defined in a TOSCA recipe
+        """
+        recipe = """
+    tosca_definitions_version: tosca_simple_yaml_1_0
+
+    description: Persist xos-sample-gui-extension
+
+    imports:
+       - custom_types/xosguiextension.yaml
+
+    topology_template:
+      node_templates:
+
+        # UI Extension
+        test:
+          type: tosca.nodes.XOSGuiExtension
+          properties:
+            name: test
+            files: /spa/extensions/test/vendor.js, /spa/extensions/test/app.js
+    """
+
+        parser = TOSCA_Parser(recipe, USERNAME, PASSWORD, delete=True)
+
+        parser.execute()
+
+        # checking that the model has been saved
+        mock_delete.assert_called()
+
+        self.assertIsNotNone(parser.templates_by_model_name['test'])
+        self.assertEqual(parser.ordered_models_name, ['test'])
 
     @patch.dict(RESOURCES, mock_resources, clear=True)
     @patch.object(FakeSite.objects, 'filter', MagicMock(return_value=[FakeModel]))

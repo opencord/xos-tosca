@@ -127,7 +127,11 @@ class TOSCA_Parser:
             setattr(model, "%s_id" % class_name, related_model.id)
         return model
 
-    def __init__(self, recipe, username, password):
+    def __init__(self, recipe, username, password, **kwargs):
+
+        self.delete = False
+        if 'delete' in kwargs:
+            self.delete = True
 
         # store username/password combination to read resources
         self.username = username
@@ -148,6 +152,7 @@ class TOSCA_Parser:
         self.recipe = recipe
 
     def execute(self):
+
         try:
             # [] save the recipe to a tmp file
             self.save_recipe_to_tmp_file(self.recipe)
@@ -173,8 +178,11 @@ class TOSCA_Parser:
                 # [] check if the model has requirements
                 # [] if it has populate them
                 model = self.populate_dependencies(model, recipe.requirements, self.saved_model_by_name)
-                # [] save or update
-                model.save()
+                # [] save, update or delete
+                if self.delete and not model.is_new:
+                    model.delete()
+                elif not self.delete:
+                    model.save()
 
                 self.saved_model_by_name[recipe.name] = model
 
