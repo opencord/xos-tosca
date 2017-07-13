@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "5a202591_ea228b00",
+        "filename": "Dockerfile",
+        "patchSetId": 1
+      },
+      "lineNbr": 17,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2017-07-13T00:50:24Z",
+      "side": 1,
+      "message": "Most other images have the entrypoint after labels",
+      "revId": "63a0337c113863a130fa38612feeaead9cc2ff87",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
