@@ -14,6 +14,7 @@ class GRPCModelsAccessor:
         if data.get('name'):
             used_key = 'name'
         else:
+            # FIXME apparently we're not matching model without a name field
             used_key = data.keys()[0]
 
         key = "%s~%s" % (username, password)

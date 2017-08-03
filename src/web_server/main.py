@@ -39,8 +39,14 @@ class TOSCA_WebServer:
             response[name] = "/custom_type/%s" % name
         return json.dumps(response)
 
+    @app.route("/custom_type/<name>")
+    def custom_type(self, request, name):
+        request.responseHeaders.addRawHeader(b"content-type", b"text/plain")
+        custom_type = open(TOSCA_DEFS_DIR + '/' + name + '.yaml').read()
+        return custom_type
+
     @app.route('/run', methods=['POST'])
-    def execute(self, request):
+    def run(self, request):
         recipe = request.content.read()
         headers = request.getAllHeaders()
         username = headers['xos-username']
@@ -51,11 +57,17 @@ class TOSCA_WebServer:
         d.addCallback(self.execute_tosca)
         return d
 
-    @app.route("/custom_type/<name>")
-    def custom_type(self, request, name):
-        request.responseHeaders.addRawHeader(b"content-type", b"text/plain")
-        custom_type = open(TOSCA_DEFS_DIR + '/' + name + '.yaml').read()
-        return custom_type
+    @app.route('/delete', methods=['POST'])
+    def delete(self, request):
+        recipe = request.content.read()
+        headers = request.getAllHeaders()
+        username = headers['xos-username']
+        password = headers['xos-password']
+
+        d = GRPC_Client().create_secure_client(username, password, recipe)
+        self.parser = TOSCA_Parser(recipe, username, password, delete=True)
+        d.addCallback(self.execute_tosca)
+        return d
 
     def __init__(self):
         self.app.run('0.0.0.0', '9102')
