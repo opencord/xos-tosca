@@ -4,7 +4,7 @@ node_types:
 {% for m in proto.messages %}
     tosca.nodes.{{ m.name }}:
         derived_from: tosca.nodes.Root
-        description: {% if m.options.tosca_description -%}{{ m.options.tosca_description}}{% else%}"An XOS {{ m.name }}"{%- endif %}
+        description: {% if m.options.description -%}{{ m.options.description}}{% else%}"An XOS {{ m.name }}"{%- endif %}
         capabilities:
             {{ m.name|lower }}:
                 type: tosca.capabilities.xos.{{ m.name }}
