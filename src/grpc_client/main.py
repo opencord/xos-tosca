@@ -27,8 +27,11 @@ class GRPC_Client:
     def __init__(self):
         self.client = None
 
-        self.grpc_secure_endpoint = Config.get('grpc.secure_endpoint')
-        self.grpc_insecure_endpoint = Config.get('grpc.insecure_endpoint')
+        insecure = Config.get_service_info('xos-grpc-insecure')
+        secure = Config.get_service_info('xos-grpc-secure')
+
+        self.grpc_secure_endpoint = "%s:%s" % (secure['url'], secure['port'])
+        self.grpc_insecure_endpoint = "%s:%s" % (insecure['url'], insecure['port'])
 
     def setup_resources(self, client, key, deferred, recipe):
         print "[XOS-TOSCA] Loading resources"
