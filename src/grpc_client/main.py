@@ -21,14 +21,17 @@ from resources import RESOURCES
 from xosconfig import Config
 from twisted.internet import reactor
 
-LOCAL_CERT = '/Users/teone/Sites/opencord/orchestration/xos-tosca/local_certs.crt'
-
 class GRPC_Client:
     def __init__(self):
         self.client = None
 
-        self.grpc_secure_endpoint = Config.get('grpc.secure_endpoint')
-        self.grpc_insecure_endpoint = Config.get('grpc.insecure_endpoint')
+        insecure = Config.get('gprc_endpoint')
+        secure = Config.get('gprc_endpoint')
+
+        self.grpc_secure_endpoint = secure + ":50051"
+        self.grpc_insecure_endpoint = insecure + ":50055"
+
+        print self.grpc_secure_endpoint, self.grpc_insecure_endpoint
 
     def setup_resources(self, client, key, deferred, recipe):
         print "[XOS-TOSCA] Loading resources"
@@ -63,7 +66,8 @@ class GRPC_Client:
         if key in RESOURCES:
             reactor.callLater(0, deferred.callback, recipe)
         else:
-            client = SecureClient(endpoint=self.grpc_secure_endpoint, username=username, password=password, cacert=LOCAL_CERT)
+            local_cert = Config.get('local_cert')
+            client = SecureClient(endpoint=self.grpc_secure_endpoint, username=username, password=password, cacert=local_cert)
             client.set_reconnect_callback(functools.partial(self.setup_resources, client, key, deferred, recipe))
             client.start()
         return deferred
