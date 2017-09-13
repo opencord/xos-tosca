@@ -37,7 +37,6 @@ class Main:
 
         TOSCA_Generator().generate(client)
 
-
         return deferred
 
     def start(self):
