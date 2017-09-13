@@ -35,9 +35,10 @@ class TOSCA_Generator:
     def generate(self, client):
         print "[XOS-TOSCA] Generating TOSCA"
         self._clean()
-        xproto = client.utility.GetXproto(Empty())
+
 
         try:
+            xproto = client.utility.GetXproto(Empty())
             args = Args()
             args.output = TOSCA_DEFS_DIR
             args.inputs = str(xproto.xproto)
