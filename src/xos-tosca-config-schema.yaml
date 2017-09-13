@@ -28,14 +28,4 @@ map:
         type: str
         required: True
   logging:
-    type: map
-    map:
-      logstash_hostport:
-        type: str
-      level:
-        type: str
-      channels:
-        type: seq
-        sequence:
-          - type: str
-            enum: ['file', 'console', 'elkstack']
+    type: any
