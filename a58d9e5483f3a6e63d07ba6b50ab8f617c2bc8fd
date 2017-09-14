@@ -91,6 +91,30 @@
       "revId": "a58d9e5483f3a6e63d07ba6b50ab8f617c2bc8fd",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_6d31110b",
+        "filename": "docs/README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000007
+      },
+      "writtenOn": "2017-09-14T21:05:48Z",
+      "side": 1,
+      "message": "No that\u0027s the node name as assigned by MAAS",
+      "parentUuid": "9a5c5d37_6d4a3185",
+      "range": {
+        "startLine": 77,
+        "startChar": 14,
+        "endLine": 77,
+        "endChar": 27
+      },
+      "revId": "a58d9e5483f3a6e63d07ba6b50ab8f617c2bc8fd",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
     }
   ]
 }
