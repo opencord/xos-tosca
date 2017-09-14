@@ -2,6 +2,29 @@
   "comments": [
     {
       "key": {
+        "uuid": "9a5c5d37_ed7621d8",
+        "filename": "docs/README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 14,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2017-09-14T20:57:49Z",
+      "side": 1,
+      "message": "known",
+      "range": {
+        "startLine": 14,
+        "startChar": 124,
+        "endLine": 14,
+        "endChar": 128
+      },
+      "revId": "a58d9e5483f3a6e63d07ba6b50ab8f617c2bc8fd",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
         "uuid": "9a5c5d37_ade4a9ac",
         "filename": "docs/README.md",
         "patchSetId": 2
@@ -18,6 +41,52 @@
         "startChar": 0,
         "endLine": 18,
         "endChar": 35
+      },
+      "revId": "a58d9e5483f3a6e63d07ba6b50ab8f617c2bc8fd",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_cd5a3d50",
+        "filename": "docs/README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 18,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2017-09-14T20:57:49Z",
+      "side": 1,
+      "message": "I\u0027m tempted to suggest reinforcing that the onboarded models include not only the core, but also any onboarded service models. (We the core team know this, but service developers have become used to having to code their tosca specifications manually)",
+      "range": {
+        "startLine": 18,
+        "startChar": 131,
+        "endLine": 18,
+        "endChar": 139
+      },
+      "revId": "a58d9e5483f3a6e63d07ba6b50ab8f617c2bc8fd",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9a5c5d37_6d4a3185",
+        "filename": "docs/README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 77,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2017-09-14T20:57:49Z",
+      "side": 1,
+      "message": "Is this a hostname? and if so, should it be greatful-vest ?",
+      "range": {
+        "startLine": 77,
+        "startChar": 14,
+        "endLine": 77,
+        "endChar": 27
       },
       "revId": "a58d9e5483f3a6e63d07ba6b50ab8f617c2bc8fd",
       "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
