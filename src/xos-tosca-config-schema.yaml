@@ -18,24 +18,11 @@ map:
   name:
     type: str
     required: True
-  grpc:
-    type: map
-    map:
-      secure_endpoint:
-        type: str
-        required: True
-      insecure_endpoint:
-        type: str
-        required: True
+  gprc_endpoint:
+    type: str
+    required: True
+  local_cert:
+    type: str
+    required: True
   logging:
-    type: map
-    map:
-      logstash_hostport:
-        type: str
-      level:
-        type: str
-      channels:
-        type: seq
-        sequence:
-          - type: str
-            enum: ['file', 'console', 'elkstack']
+    type: any
