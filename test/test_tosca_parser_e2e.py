@@ -202,7 +202,6 @@ topology_template:
         description: Create a new site with one user
 
         imports:
-           - custom_types/user.yaml
            - custom_types/site.yaml
 
         topology_template:
