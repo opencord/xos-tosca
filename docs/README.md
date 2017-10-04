@@ -76,3 +76,42 @@ topology_template:
       properties:
         name: Grateful Vest
 ```
+
+### Where to find the generated specs?
+
+On any running CORD POD, the TOSCA apis are accessible as:
+```
+curl http://<head-node-ip>:<head-node-port>/xos-tosca | jq .
+```
+
+> NOTE that this command is using `jq` a cli JSON parsing tool, 
+> to install it you can use `apt-get install jq` or `brew install jq`
+> depending on your system
+
+And it will return a list of all the recipes with the related url:
+```
+{
+  "image": "/custom_type/image",
+  "site": "/custom_type/site",
+  ...
+}
+```
+
+For examples, to site the TOSCA spec of the Site model, you can use the URL:
+```
+curl http://<head-node-ip>:<head-node-port>/xos-tosca/custom_type/site
+```
+
+### How to load a TOSCA recipe in the system
+
+The `xos-tosca` container exposes two endpoint:
+
+```
+POST http://<head-node-ip>:<head-node-port>/xos-tosca/run
+POST http://<head-node-ip>:<head-node-port>/xos-tosca/delete
+```
+
+To load a recipe via `curl` you can use this command:
+```
+curl -H "xos-username: xosadmin@opencord.org" -H "xos-password: <xos-password>" -X POST --data-binary @<path/to/file> http://<head-node-ip>:<head-node-port>/xos-tosca//run
+```
