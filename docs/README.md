@@ -1,38 +1,23 @@
-# TOSCA Interface
+# XOS TOSCA User Manual
 
-A TOSCA interface is available for configuring and controlling CORD. It is 
-auto-generated from the set of [models](xos/README.md) configured 
-into the POD manifest, and includes both core and service-specific models.
+The `xos-tosca` container is responsible to autogenerate the TOSCA interface starting from the `xproto` definition.
 
->In `CORD-4.0` this `TOSCA` interface is released as an `alpha` feature.
+<br/>
+>In `CORD-4.0` this `TOSCA` engine is released as an `alpha` feature.
 
 ## What is TOSCA?
 
-Topology and Orchestration Specification for Cloud Applications
-(TOSCA) is an OASIS standard language to describe a topology of cloud
-based web services, their components, relationships, and the processes
-that manage them. The TOSCA standard includes specifications to
-describe processes that create or modify web services. You can read
-more about it on the
-[OASIS](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=tosca)
-website.
+Topology and Orchestration Specification for Cloud Applications (TOSCA), is an OASIS standard language to describe a topology of cloud based web services, their components, relationships, and the processes that manage them. The TOSCA standard includes specifications to describe processes that create or modify web services.
 
-CORD extends the TOSCA specification to support custom models for
-services, allow operators to manage them with a simple and well-known
-YAML interface.
+You can read more about it on the [OASIS](https://www.oasis-open.org/committees/tc_home.php?wg_abbrev=tosca) website.
 
-## Internals
+In XOS we are extending the TOSCA specification to support our custom models and let you manage them with a simple and well known YAML interface.
 
-The `xos-tosca` container autogenerates the TOSCA interface starting
-from the `xproto` definition.  When the `xos-tosca` container starts,
-it connects to `xos-core`
-via the `gRPC` API to fetch all the `xproto` definition of the
-onboarded models. This includes both `core` and `service` models.
-Then using the `xos-genx` toolchain, it will generates the
-corresponding TOSCA specifications.
+## Overview
 
-For example, the `xproto` definition of a compute node in `XOS` is:
+When the `xos-tosca` container starts, it will connect to `xos-core` via the `gRPC` APIs to fetch all the `xproto` definition of the onboarded models, this include both `core` and `service` models. Then using the `xos-genx` toolchain it will generate TOSCA specification for them.
 
+For example, the `xproto` definition of a compute node in `XOS`:
 ```
 message Node::node_policy (XOSBase) {
      required string name = 1 [max_length = 200, content_type = "stripped", blank = False, help_text = "Name of the Node", null = False, db_index = False];
@@ -40,8 +25,7 @@ message Node::node_policy (XOSBase) {
 }
 ```
 
-which is then transformed in the following TOSCA spec:
-
+Will be transformed in a TOSCA spec:
 ```
 tosca_definitions_version: tosca_simple_yaml_1_0
 
@@ -74,15 +58,7 @@ node_types:
         description: Node
 ```
 
-In TOSCA terminology, the above woule be called a `TOSCA node type`
-(although confusingly, it's defined for the `Node` model in CORD,
-which represents a server).
-
-## Using TOSCA
-
-Once CORD is up and running, a `node` can be added to a POD
-using the TOSCA interface by uploading the following recipe:
-
+And a `node` can be added to `XOS` using this recipe:
 ```
 tosca_definitions_version: tosca_simple_yaml_1_0
 
@@ -101,4 +77,41 @@ topology_template:
         name: Grateful Vest
 ```
 
-In TOSCA terminology, the above would be called a `TOSCA node template`.
+### Where to find the generated specs?
+
+On any running CORD POD, the TOSCA apis are accessible as:
+```
+curl http://<head-node-ip>:<head-node-port>/xos-tosca | jq .
+```
+
+> NOTE that this command is using `jq` a cli JSON parsing tool, 
+> to install it you can use `apt-get install jq` or `brew install jq`
+> depending on your system
+
+And it will return a list of all the recipes with the related url:
+```
+{
+  "image": "/custom_type/image",
+  "site": "/custom_type/site",
+  ...
+}
+```
+
+For examples, to site the TOSCA spec of the Site model, you can use the URL:
+```
+curl http://<head-node-ip>:<head-node-port>/xos-tosca/custom_type/site
+```
+
+### How to load a TOSCA recipe in the system
+
+The `xos-tosca` container exposes two endpoint:
+
+```
+POST http://<head-node-ip>:<head-node-port>/xos-tosca/run
+POST http://<head-node-ip>:<head-node-port>/xos-tosca/delete
+```
+
+To load a recipe via `curl` you can use this command:
+```
+curl -H "xos-username: xosadmin@opencord.org" -H "xos-password: <xos-password>" -X POST --data-binary @<path/to/file> http://<head-node-ip>:<head-node-port>/xos-tosca//run
+```
