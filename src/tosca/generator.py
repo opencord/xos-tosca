@@ -43,8 +43,7 @@ class TOSCA_Generator:
             args.output = TOSCA_DEFS_DIR
             args.inputs = str(xproto.xproto)
             args.target = os.path.join(current_dir, 'xtarget/tosca.xtarget')
-            args.write_to_file = 'model'
-            args.dest_extension = 'yaml'
+            args.write_to_file = 'target'
             XOSGenerator.generate(args)
             print "[XOS-TOSCA] Recipes generated in %s" % args.output
         except Exception as e:
