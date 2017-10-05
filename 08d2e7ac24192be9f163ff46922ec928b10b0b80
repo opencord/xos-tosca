@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9a5c5d37_3f4b2d2d",
+        "filename": "docs/README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 110,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2017-10-05T00:18:10Z",
+      "side": 1,
+      "message": "If you just want to pretty print the JSON, this is a no-download option:\n\n  | python -m json.tool",
+      "range": {
+        "startLine": 110,
+        "startChar": 54,
+        "endLine": 110,
+        "endChar": 60
+      },
+      "revId": "08d2e7ac24192be9f163ff46922ec928b10b0b80",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
