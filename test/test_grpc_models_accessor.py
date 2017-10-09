@@ -120,5 +120,16 @@ class GRPCModelsAccessor_Create_or_update_Test(unittest.TestCase):
         mock_filter.assert_called_with(foo="bar")
         mock_new.assert_called()
 
+    @patch.dict(RESOURCES, mock_resources, clear=True)
+    @patch.object(FakeResource.objects, "new")
+    def test_model_without_properties(self, mock_new):
+        """
+        [GRPCModelsAccessor] get_model_from_classname: should create a new model if not properties are specified
+        """
+        data = {
+        }
+        GRPCModelsAccessor.get_model_from_classname('test-model', data, USERNAME, PASSWORD)
+        mock_new.assert_called()
+
 if __name__ == '__main__':
     unittest.main()

@@ -98,20 +98,24 @@ class TOSCA_Parser:
     @staticmethod
     def populate_model(model, data):
         for k,v in data.iteritems():
-            setattr(model, k, v)
+            # NOTE must-exists is a TOSCA implementation choice, remove it before saving the model
+            if k != "must-exist":
+                setattr(model, k, v)
         return model
 
     @staticmethod
     def _translate_exception(msg):
         readable = []
         for line in msg.splitlines():
-            if line.strip().startswith('MissingRequiredFieldError'):
-                readable.append(line)
-            if line.strip().startswith('UnknownFieldError'):
+            if line.strip().startswith('MissingRequiredFieldError') or \
+                    line.strip().startswith('UnknownFieldError') or \
+                    line.strip().startswith('ImportError') or \
+                    line.strip().startswith('InvalidTypeError') or \
+                    line.strip().startswith('TypeMismatchError'):
                 readable.append(line)
 
         if len(readable) > 0:
-            return '/n'.join(readable)
+            return '\n'.join(readable) + '\n'
         else:
             return msg
 
@@ -184,23 +188,33 @@ class TOSCA_Parser:
             self.ordered_models_template = self.get_ordered_models_template(self.ordered_models_name, self.templates_by_model_name)
 
             for recipe in self.ordered_models_template:
-                # get properties from tosca
-                data = recipe.templates[recipe.name]['properties']
-                # [] get model by class name
-                class_name = recipe.type.replace("tosca.nodes.", "")
-                model = GRPCModelsAccessor.get_model_from_classname(class_name, data, self.username, self.password)
-                # [] populate model with data
-                model = self.populate_model(model, data)
-                # [] check if the model has requirements
-                # [] if it has populate them
-                model = self.populate_dependencies(model, recipe.requirements, self.saved_model_by_name)
-                # [] save, update or delete
-                if self.delete and not model.is_new:
-                    model.delete()
-                elif not self.delete:
-                    model.save()
+                try:
+                    # get properties from tosca
+                    if not 'properties' in recipe.templates[recipe.name]:
+                        data = {}
+                    else:
+                        data = recipe.templates[recipe.name]['properties']
+                        if data == None:
+                            data = {}
+                    # [] get model by class name
+                    class_name = recipe.type.replace("tosca.nodes.", "")
+                    model = GRPCModelsAccessor.get_model_from_classname(class_name, data, self.username, self.password)
+                    # [] populate model with data
+                    model = self.populate_model(model, data)
+                    # [] check if the model has requirements
+                    # [] if it has populate them
+                    model = self.populate_dependencies(model, recipe.requirements, self.saved_model_by_name)
+                    # [] save, update or delete
 
-                self.saved_model_by_name[recipe.name] = model
+                    if self.delete and not model.is_new:
+                        model.delete()
+                    elif not self.delete:
+                        model.save()
+
+                    self.saved_model_by_name[recipe.name] = model
+                except Exception, e:
+                    print "[XOS-TOSCA] Failed to save model: %s [%s]" % (class_name, recipe.name)
+                    raise e
 
         except ValidationError as e:
             if e.message:
@@ -216,6 +230,6 @@ class TOSCA_Parser:
                 exception_msg = e._state.details
             raise Exception(exception_msg)
         except Exception, e:
-            raise e
+            raise Exception(e)
 
 
