@@ -5,6 +5,20 @@ tosca_definitions_version: tosca_simple_yaml_1_0
 
 node_types:
 
+    # Example usage:
+    #
+    # <node-name>:
+    #     type: tosca.nodes.{{ m.name }}
+    #     properties:
+    #       must-exist: true # optional to reference models created in other recipes
+{%- for f in (m.fields + xproto_base_fields(m, proto.message_table)) | sort(attribute='name') %}
+{%- if not f.link and xproto_tosca_required(f.options.null, f.options.blank, f.options.default) %}
+    #       {{ f.name }}: <value>
+{%- endif -%}
+{%- endfor %}
+
+
+
     tosca.nodes.{{ m.name }}:
         derived_from: tosca.nodes.Root
         description: {% if m.options.description -%}{{ m.options.description}}{% else%}"An XOS {{ m.name }}"{%- endif %}
@@ -27,6 +41,16 @@ node_types:
 
     {% for l in m.links %}
     {%- if l.link_type == "manytoone" -%}
+
+
+    # Identify a {{ l.peer.name }} that belongs to a {{ m.name }}
+    #
+    # example usage:
+    # requirements:
+    #   - {{ l.src_port }}:
+    #       node: <node-name>:
+    #       relationship: tosca.relationships.BelongsToOne
+
     tosca.relationships.BelongsToOne:
         derived_from: tosca.relationships.Root
         valid_target_types: [ tosca.capabilities.xos.{{ l.peer.name }} ]

@@ -31,8 +31,6 @@ class GRPC_Client:
         self.grpc_secure_endpoint = secure + ":50051"
         self.grpc_insecure_endpoint = insecure + ":50055"
 
-        print self.grpc_secure_endpoint, self.grpc_insecure_endpoint
-
     def setup_resources(self, client, key, deferred, recipe):
         print "[XOS-TOSCA] Loading resources"
         if key not in RESOURCES:
