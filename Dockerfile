@@ -1,3 +1,5 @@
+# docker build -t xosproject/xos-tosca:candidate .
+
 # xosproject/xos-tosca
 FROM xosproject/xos-client:candidate
 

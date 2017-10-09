@@ -78,7 +78,7 @@ class TOSCA_Generator_Test(unittest.TestCase):
         args.write_to_file = 'target'
         args.quiet = False
         output = XOSGenerator.generate(args)
-        self.assertEqual(output.count("name:"), 2)
+        self.assertEqual(output.count("name:"), 4)
         self.assertIn("prop:", output)
 
 if __name__ == '__main__':
