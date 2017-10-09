@@ -30,8 +30,11 @@ class GRPCModelsAccessor:
         if data.get('name'):
             used_key = 'name'
         else:
-            # FIXME apparently we're not matching model without a name field
-            used_key = data.keys()[0]
+            if len(data.keys()) > 0:
+                # FIXME apparently we're not matching model without a name field
+                used_key = data.keys()[0]
+            else:
+                used_key = None
 
         key = "%s~%s" % (username, password)
         if not key in RESOURCES:
@@ -40,7 +43,11 @@ class GRPCModelsAccessor:
             raise Exception('[XOS-TOSCA] The model you are trying to create (%s: %s, class: %s) is not know by xos-core' % (used_key, data[used_key], class_name))
 
         cls = RESOURCES[key][class_name]
-        models = cls.objects.filter(**{used_key: data[used_key]})
+        if used_key:
+            models = cls.objects.filter(**{used_key: data[used_key]})
+        else:
+            # NOTE if we don't have a way to track the model, create a new one
+            models = []
 
         if len(models) == 1:
             print "[XOS-Tosca] Model %s already exist, retrieving instance..." % data[used_key]
@@ -51,7 +58,8 @@ class GRPCModelsAccessor:
                 raise Exception("[XOS-TOSCA] Model %s:%s has property 'must-exist' but cannot be found" % (class_name, data[used_key]))
 
             model = cls.objects.new()
-            print "[XOS-Tosca] Model %s is new, creating new instance..." % data[used_key]
+            print "[XOS-Tosca] Model %s is new, creating new instance..." % data[used_key] if used_key else class_name
         else:
             raise Exception("[XOS-Tosca] Model %s has multiple instances, I can't handle it" % data[used_key])
+
         return model
