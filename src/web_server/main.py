@@ -37,12 +37,17 @@ class TOSCA_WebServer:
     app = Klein()
 
     def execute_tosca(self, recipe):
+        self.parser.execute()
+        response_text = "Created models: %s" % str(self.parser.ordered_models_name)
+        return response_text
+
+    def errorCallback(self, failure, request):
+        request.setResponseCode(500)
         try:
-            self.parser.execute()
-            response_text = "Created models: %s" % str(self.parser.ordered_models_name)
-            return response_text
-        except Exception, e:
-            return e.message
+            return failure.getErrorMessage()
+        except:
+            print failure
+            return "Internal server error, please report this along with the failed recipe."
 
     @app.route('/', methods=['GET'])
     def index(self, request):
@@ -70,7 +75,8 @@ class TOSCA_WebServer:
 
         d = GRPC_Client().create_secure_client(username, password, recipe)
         self.parser = TOSCA_Parser(recipe, username, password)
-        d.addCallback(self.execute_tosca)
+        tosca_execution = d.addCallback(self.execute_tosca)
+        tosca_execution.addErrback(self.errorCallback, request)
         return d
 
     @app.route('/delete', methods=['POST'])
@@ -82,7 +88,8 @@ class TOSCA_WebServer:
 
         d = GRPC_Client().create_secure_client(username, password, recipe)
         self.parser = TOSCA_Parser(recipe, username, password, delete=True)
-        d.addCallback(self.execute_tosca)
+        tosca_execution = d.addCallback(self.execute_tosca)
+        tosca_execution.addErrback(self.errorCallback, request)
         return d
 
     def __init__(self):
