@@ -175,8 +175,21 @@ MissingRequiredFieldError: some message
         python error
         starting at line
             38209834 of some file
+UnknownFieldError: with some message
+    followed by useless things
+ImportError: with some message
+    followed by useless things
+InvalidTypeError: with some message
+    followed by useless things
+TypeMismatchError: with some message
+    followed by useless things
         """)
-        self.assertEqual(e, "MissingRequiredFieldError: some message")
+        self.assertEqual(e, """MissingRequiredFieldError: some message
+UnknownFieldError: with some message
+ImportError: with some message
+InvalidTypeError: with some message
+TypeMismatchError: with some message
+""")
 
     def test_save_recipe_to_tmp_file(self):
         """
