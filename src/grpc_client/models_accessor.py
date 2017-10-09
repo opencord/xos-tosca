@@ -54,4 +54,5 @@ class GRPCModelsAccessor:
             print "[XOS-Tosca] Model %s is new, creating new instance..." % data[used_key]
         else:
             raise Exception("[XOS-Tosca] Model %s has multiple instances, I can't handle it" % data[used_key])
+
         return model
