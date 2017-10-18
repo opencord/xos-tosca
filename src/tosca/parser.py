@@ -147,6 +147,14 @@ class TOSCA_Parser:
             setattr(model, "%s_id" % class_name, related_model.id)
         return model
 
+    @staticmethod
+    def add_dependencies(data, requirements, saved_models):
+        for dep in requirements:
+            class_name = dep.keys()[0]
+            related_model = saved_models[dep[class_name]['node']]
+            data["%s_id" % class_name] = related_model.id
+        return data
+
     def __init__(self, recipe, username, password, **kwargs):
 
         self.delete = False
@@ -198,6 +206,10 @@ class TOSCA_Parser:
                             data = {}
                     # [] get model by class name
                     class_name = recipe.type.replace("tosca.nodes.", "")
+
+                    # augemnt data with relations
+                    data = self.add_dependencies(data, recipe.requirements, self.saved_model_by_name)
+
                     model = GRPCModelsAccessor.get_model_from_classname(class_name, data, self.username, self.password)
                     # [] populate model with data
                     model = self.populate_model(model, data)

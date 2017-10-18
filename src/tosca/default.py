@@ -18,3 +18,4 @@ import os
 
 TOSCA_DEFS_DIR = os.path.dirname(os.path.realpath(__file__)) + "/custom_types"
 TOSCA_RECIPES_DIR = os.path.dirname(os.path.realpath(__file__)) + "/"
+TOSCA_KEYS_DIR = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../grpc_client")

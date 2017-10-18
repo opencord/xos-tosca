@@ -220,4 +220,4 @@ topology_template:
         with self.assertRaises(Exception) as e:
             parser.execute()
 
-        self.assertEqual(e.exception.message.message, "[XOS-TOSCA] Model Site:Open Networking Lab has property 'must-exist' but cannot be found")
+        self.assertEqual(e.exception.message.message, "[XOS-TOSCA] Model of class Site and properties {'name': 'Open Networking Lab'} has property 'must-exist' but cannot be found")

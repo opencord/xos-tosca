@@ -11,7 +11,8 @@ tests: tosca
 	nosetests -s -v --with-id --with-coverage --cover-html --cover-erase --cover-xml --cover-package="grpc_client, tosca"
 
 build:
-	docker build -t xosproject/xos-tosca --no-cache=true .
+	docker build -t xosproject/xos-tosca .
+	docker tag xosproject/xos-tosca:latest xosproject/xos-tosca:candidate
 
 start: build
 	docker run -p 9200:9200 --name xos-tosca -d xosproject/xos-tosca
@@ -28,3 +29,4 @@ test-delete:
 
 tosca:
 	xosgenx --target=src/tosca/xtarget/tosca.xtarget --output=src/tosca/custom_types --write-to-file=target ../xos/xos/core/models/core.xproto
+	xosgenx --target=src/tosca/xtarget/tosca_keys.xtarget --output=src/grpc_client/ --write-to-file=single --dest-file=KEYS.py ../xos/xos/core/models/core.xproto
