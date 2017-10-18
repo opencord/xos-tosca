@@ -28,3 +28,4 @@ test-delete:
 
 tosca:
 	xosgenx --target=src/tosca/xtarget/tosca.xtarget --output=src/tosca/custom_types --write-to-file=target ../xos/xos/core/models/core.xproto
+	xosgenx --target=src/tosca/xtarget/tosca_keys.xtarget --output=src/grpc_client/ --write-to-file=single --dest-file=KEYS.py ../xos/xos/core/models/core.xproto
