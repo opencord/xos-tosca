@@ -3,6 +3,7 @@
 .noseids
 local_certs.crt
 src/tosca/tmp.yaml
+src/grpc_client/KEYS.py
 
 # Test Coverage
 .coverage
