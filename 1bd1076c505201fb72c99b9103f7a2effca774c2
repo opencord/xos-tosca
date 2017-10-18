@@ -1,0 +1,8 @@
+Code-Review+2: Sapan Bhatia <sapan@opennetworking.org>
+Code-Review+2: Scott Baker <scottb@onlab.us>
+Verified+1: Jenkins Jenkins <do-not-reply@opencord.org>
+Submitted-by: Matteo Scandolo <teo@opennetworking.org>
+Submitted-at: Wed, 18 Oct 2017 09:53:42 -0700
+Reviewed-on: https://gerrit.opencord.org/6461
+Project: xos-tosca
+Branch: refs/heads/master
