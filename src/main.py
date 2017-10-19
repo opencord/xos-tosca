@@ -22,8 +22,9 @@ from twisted.internet import defer
 from xosconfig import Config
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-config_file = os.path.join(current_dir, './xos-tosca-config.yaml')
-config_schema = os.path.join(current_dir, './xos-tosca-config-schema.yaml')
+config_file = os.path.join(current_dir, 'xos-tosca.config.yaml')
+config_schema = os.path.join(current_dir, 'xos-tosca-config-schema.yaml')
+
 Config.init(config_file, config_schema)
 
 class Main:
