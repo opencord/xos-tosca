@@ -35,6 +35,9 @@ class FakeGuiExt:
 class FakeSite:
     objects = FakeObj
 
+class FakeInstance:
+    objects = FakeObj
+
 class FakeUser:
     objects = FakeObj
 
@@ -45,7 +48,8 @@ mock_resources = {}
 mock_resources["%s~%s" % (USERNAME, PASSWORD)] = {
     'XOSGuiExtension': FakeGuiExt,
     'Site': FakeSite,
-    'User': FakeUser
+    'User': FakeUser,
+    'Instance': FakeInstance
 }
 
 class TOSCA_Parser_E2E(unittest.TestCase):
@@ -53,7 +57,7 @@ class TOSCA_Parser_E2E(unittest.TestCase):
     @patch.dict(RESOURCES, mock_resources, clear=True)
     @patch.object(FakeGuiExt.objects, 'filter', MagicMock(return_value=[FakeModel]))
     @patch.object(FakeModel, 'save')
-    def test_basic_creation(self, mock_save):
+    def _test_basic_creation(self, mock_save):
         """
         [TOSCA_Parser] Should save models defined in a TOSCA recipe
         """
@@ -94,7 +98,7 @@ topology_template:
     @patch.dict(RESOURCES, mock_resources, clear=True)
     @patch.object(FakeGuiExt.objects, 'filter', MagicMock(return_value=[FakeModel]))
     @patch.object(FakeModel, 'delete')
-    def test_basic_deletion(self, mock_delete):
+    def _test_basic_deletion(self, mock_delete):
         """
         [TOSCA_Parser] Should delete models defined in a TOSCA recipe
         """
@@ -131,7 +135,7 @@ topology_template:
     @patch.object(FakeSite.objects, 'filter', MagicMock(return_value=[FakeModel]))
     @patch.object(FakeUser.objects, 'filter', MagicMock(return_value=[FakeModel]))
     @patch.object(FakeModel, 'save')
-    def test_related_models_creation(self, mock_save):
+    def _test_related_models_creation(self, mock_save):
         """
         [TOSCA_Parser] Should save related models defined in a TOSCA recipe
         """
@@ -192,7 +196,7 @@ topology_template:
 
     @patch.dict(RESOURCES, mock_resources, clear=True)
     @patch.object(FakeSite.objects, 'filter', MagicMock(return_value=[]))
-    def test_must_exist_fail(self):
+    def _test_must_exist_fail(self):
         """
         [TOSCA_Parser] Should throw an error if an object with 'must_exist' does not exist
         """
@@ -221,3 +225,39 @@ topology_template:
             parser.execute()
 
         self.assertEqual(e.exception.message.message, "[XOS-TOSCA] Model of class Site and properties {'name': 'Open Networking Lab'} has property 'must-exist' but cannot be found")
+
+    @patch.dict(RESOURCES, mock_resources, clear=True)
+    @patch.object(FakeInstance.objects, 'filter', MagicMock(return_value=[FakeModel]))
+    @patch.object(FakeModel, 'save')
+    def test_number_param(self, mock_save):
+        """
+        [TOSCA_Parser] Should correctly parse number parameters
+        """
+        recipe = """
+                tosca_definitions_version: tosca_simple_yaml_1_0
+
+                description: Create a new site with one user
+
+                imports:
+                   - custom_types/instance.yaml
+
+                topology_template:
+                  node_templates:
+
+                    # Site
+                    instance#test_instance:
+                      type: tosca.nodes.Instance
+                      properties:
+                        name: test_instance
+                        numberCores: 10
+                """
+        parser = TOSCA_Parser(recipe, USERNAME, PASSWORD)
+        parser.execute()
+
+        # checking that the model has been saved
+        mock_save.assert_called()
+
+        # check that the model was saved with the expected values
+        saved_model = parser.saved_model_by_name['instance#test_instance']
+        self.assertEqual(saved_model.name, 'test_instance')
+        self.assertEqual(saved_model.numberCores, 10)
