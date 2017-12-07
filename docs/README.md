@@ -1,7 +1,7 @@
 # TOSCA Interface
 
 A TOSCA interface is available for configuring and controlling CORD. It is 
-auto-generated from the set of [models](xos/README.md) configured 
+auto-generated from the set of [models](../xos/README.md) configured 
 into the POD manifest, and includes both core and service-specific models.
 
 >In `CORD-4.0` this `TOSCA` interface is released as an `alpha` feature.
