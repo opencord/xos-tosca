@@ -41,10 +41,22 @@ class GRPCModelsAccessor:
 
         filter = {}
         for k in filter_keys:
-            try:
-                filter[k] = data[k]
-            except KeyError, e:
-                raise Exception("[XOS-TOSCA] Model %s doesn't have a property for the specified tosca_key (%s)" % (class_name, e))
+            if isinstance(k, str):
+                try:
+                    filter[k] = data[k]
+                except KeyError, e:
+                    raise Exception("[XOS-TOSCA] Model %s doesn't have a property for the specified tosca_key (%s)" % (class_name, e))
+            elif isinstance(k, list):
+                # one of they keys in this list has to be set
+                one_of_key = None
+                for i in k:
+                    if i in data:
+                        one_of_key = i
+                        one_of_key_val = data[i]
+                if not one_of_key:
+                    raise Exception("[XOS-TOSCA] Model %s doesn't have a property for the specified tosca_key_one_of (%s)" % (class_name, k))
+                else:
+                    filter[one_of_key] = one_of_key_val
 
         key = "%s~%s" % (username, password)
         if not key in RESOURCES:

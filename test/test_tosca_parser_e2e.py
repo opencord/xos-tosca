@@ -57,7 +57,7 @@ class TOSCA_Parser_E2E(unittest.TestCase):
     @patch.dict(RESOURCES, mock_resources, clear=True)
     @patch.object(FakeGuiExt.objects, 'filter', MagicMock(return_value=[FakeModel]))
     @patch.object(FakeModel, 'save')
-    def _test_basic_creation(self, mock_save):
+    def test_basic_creation(self, mock_save):
         """
         [TOSCA_Parser] Should save models defined in a TOSCA recipe
         """
@@ -98,7 +98,7 @@ topology_template:
     @patch.dict(RESOURCES, mock_resources, clear=True)
     @patch.object(FakeGuiExt.objects, 'filter', MagicMock(return_value=[FakeModel]))
     @patch.object(FakeModel, 'delete')
-    def _test_basic_deletion(self, mock_delete):
+    def test_basic_deletion(self, mock_delete):
         """
         [TOSCA_Parser] Should delete models defined in a TOSCA recipe
         """
@@ -135,7 +135,7 @@ topology_template:
     @patch.object(FakeSite.objects, 'filter', MagicMock(return_value=[FakeModel]))
     @patch.object(FakeUser.objects, 'filter', MagicMock(return_value=[FakeModel]))
     @patch.object(FakeModel, 'save')
-    def _test_related_models_creation(self, mock_save):
+    def test_related_models_creation(self, mock_save):
         """
         [TOSCA_Parser] Should save related models defined in a TOSCA recipe
         """
@@ -161,7 +161,7 @@ topology_template:
         hosts_nodes: True
 
     # User
-    user_test:
+    usertest:
       type: tosca.nodes.User
       properties:
         username: test@opencord.org
@@ -183,20 +183,20 @@ topology_template:
         self.assertEqual(mock_save.call_count, 2)
 
         self.assertIsNotNone(parser.templates_by_model_name['site_onlab'])
-        self.assertIsNotNone(parser.templates_by_model_name['user_test'])
-        self.assertEqual(parser.ordered_models_name, ['site_onlab', 'user_test'])
+        self.assertIsNotNone(parser.templates_by_model_name['usertest'])
+        self.assertEqual(parser.ordered_models_name, ['site_onlab', 'usertest'])
 
         # check that the model was saved with the expected values
         saved_site = parser.saved_model_by_name['site_onlab']
         self.assertEqual(saved_site.name, 'Open Networking Lab')
 
-        saved_user = parser.saved_model_by_name['user_test']
+        saved_user = parser.saved_model_by_name['usertest']
         self.assertEqual(saved_user.firstname, 'User')
         self.assertEqual(saved_user.site_id, 1)
 
     @patch.dict(RESOURCES, mock_resources, clear=True)
     @patch.object(FakeSite.objects, 'filter', MagicMock(return_value=[]))
-    def _test_must_exist_fail(self):
+    def test_must_exist_fail(self):
         """
         [TOSCA_Parser] Should throw an error if an object with 'must_exist' does not exist
         """
