@@ -37,7 +37,8 @@ mock_resources = {
     'username~pass': {
         'test-model': FakeResource,
         'single-key': FakeResource,
-        'double-key': FakeResource
+        'double-key': FakeResource,
+        'one-of-key': FakeResource
     }
 }
 
@@ -47,6 +48,7 @@ mock_keys = {
     'empty-key': [],
     'single-key': ['fake_key'],
     'double-key': ['key_1', 'key_2'],
+    'one-of-key': ['key_1', ['key_2', 'key_3']],
 }
 
 USERNAME = 'username'
@@ -130,6 +132,46 @@ class GRPCModelsAccessor_Create_or_update_Test(unittest.TestCase):
             model = GRPCModelsAccessor.get_model_from_classname('double-key', data, USERNAME, PASSWORD)
             mock_filter.assert_called_with(key_1="key1", key_2="key2")
             self.assertEqual(model, FakeModel)
+
+    @patch.object(FakeResource.objects, "filter")
+    @patch.object(FakeResource.objects, "new", MagicMock(return_value=FakeModel))
+    @patch.dict(TOSCA_KEYS, mock_keys, clear=True)
+    def test_one_of_key(self, mock_filter):
+        """
+        [GRPCModelsAccessor] get_model_from_classname: should use a composite with one_of key to lookup a model
+        """
+        # NOTE it should be valid for items with either one of the keys
+        data2 = {
+            "name": "test",
+            "key_1": "key1",
+            "key_2": "key2"
+        }
+        with patch.dict(RESOURCES, mock_resources, clear=True):
+            model = GRPCModelsAccessor.get_model_from_classname('one-of-key', data2, USERNAME, PASSWORD)
+            mock_filter.assert_called_with(key_1="key1", key_2="key2")
+            self.assertEqual(model, FakeModel)
+
+        data3 = {
+            "name": "test",
+            "key_1": "key1",
+            "key_3": "key3"
+        }
+        with patch.dict(RESOURCES, mock_resources, clear=True):
+            model = GRPCModelsAccessor.get_model_from_classname('one-of-key', data3, USERNAME, PASSWORD)
+            mock_filter.assert_called_with(key_1="key1", key_3="key3")
+            self.assertEqual(model, FakeModel)
+
+    @patch.object(FakeResource.objects, "filter")
+    @patch.object(FakeResource.objects, "new", MagicMock(return_value=FakeModel))
+    @patch.dict(TOSCA_KEYS, mock_keys, clear=True)
+    def test_one_of_key_error(self, mock_filter):
+        data = {
+            "name": "test",
+            "key_1": "key1"
+        }
+        with self.assertRaises(Exception) as e:
+            GRPCModelsAccessor.get_model_from_classname('one-of-key', data, USERNAME, PASSWORD)
+        self.assertEqual(e.exception.message, "[XOS-TOSCA] Model one-of-key doesn't have a property for the specified tosca_key_one_of (['key_2', 'key_3'])")
 
     @patch.object(FakeResource.objects, "filter")
     @patch.object(FakeResource.objects, "new", MagicMock(return_value=FakeModel))
