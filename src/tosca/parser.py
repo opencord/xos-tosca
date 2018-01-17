@@ -100,7 +100,10 @@ class TOSCA_Parser:
         for k,v in data.iteritems():
             # NOTE must-exists is a TOSCA implementation choice, remove it before saving the model
             if k != "must-exist":
-                setattr(model, k, v)
+                try:
+                    setattr(model, k, v)
+                except TypeError, e:
+                    raise Exception('Failed to set %s on field %s for class %s, Exception was: "%s"' % (v, k, model.model_name, e))
         return model
 
     @staticmethod
