@@ -161,6 +161,34 @@ class TOSCA_Parser_Test(unittest.TestCase):
         self.assertEqual(model.foo, 'bar')
         self.assertEqual(model.number, 1)
 
+    def test_populate_model_error(self):
+        """
+        [TOSCA_Parser] populate_model: should print a meaningful error message
+        """
+
+        class FakeModel:
+
+            model_name = "FakeModel"
+
+            def __setattr__(self, name, value):
+                if name == 'foo':
+                    raise TypeError('reported exception')
+                else:
+                    super(FakeModel, self).__setattr__(name, value)
+
+        data = {
+            'name': 'test',
+            'foo': None,
+            'number': 1
+        }
+
+
+        model = FakeModel()
+
+        with self.assertRaises(Exception) as e:
+            model = TOSCA_Parser.populate_model(model, data)
+        self.assertEqual(e.exception.message, 'Failed to set None on field foo for class FakeModel, Exception was: "reported exception"')
+
     def test_translate_exception(self):
         """
         [TOSCA_Parser] translate_exception: convert a TOSCA Parser exception in a user readable string

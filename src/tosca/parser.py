@@ -20,6 +20,7 @@ from grpc_client.resources import RESOURCES
 from grpc_client.models_accessor import GRPCModelsAccessor
 from grpc._channel import _Rendezvous
 import json
+import traceback
 
 class TOSCA_Parser:
 
@@ -100,7 +101,10 @@ class TOSCA_Parser:
         for k,v in data.iteritems():
             # NOTE must-exists is a TOSCA implementation choice, remove it before saving the model
             if k != "must-exist":
-                setattr(model, k, v)
+                try:
+                    setattr(model, k, v)
+                except TypeError, e:
+                    raise Exception('Failed to set %s on field %s for class %s, Exception was: "%s"' % (v, k, model.model_name, e))
         return model
 
     @staticmethod
@@ -226,6 +230,7 @@ class TOSCA_Parser:
                     self.saved_model_by_name[recipe.name] = model
                 except Exception, e:
                     print "[XOS-TOSCA] Failed to save model: %s [%s]" % (class_name, recipe.name)
+                    traceback.print_exc()
                     raise e
 
         except ValidationError as e:
