@@ -41,6 +41,9 @@ class FakeInstance:
 class FakeUser:
     objects = FakeObj
 
+class FakeNode:
+    objects = FakeObj
+
 USERNAME = "username"
 PASSWORD = "pass"
 
@@ -49,7 +52,8 @@ mock_resources["%s~%s" % (USERNAME, PASSWORD)] = {
     'XOSGuiExtension': FakeGuiExt,
     'Site': FakeSite,
     'User': FakeUser,
-    'Instance': FakeInstance
+    'Instance': FakeInstance,
+    'Node': FakeNode
 }
 
 class TOSCA_Parser_E2E(unittest.TestCase):
@@ -97,8 +101,9 @@ topology_template:
 
     @patch.dict(RESOURCES, mock_resources, clear=True)
     @patch.object(FakeGuiExt.objects, 'filter', MagicMock(return_value=[FakeModel]))
+    @patch.object(FakeNode.objects, 'filter', MagicMock(return_value=[FakeModel]))
     @patch.object(FakeModel, 'delete')
-    def test_basic_deletion(self, mock_delete):
+    def test_basic_deletion(self, mock_model):
         """
         [TOSCA_Parser] Should delete models defined in a TOSCA recipe
         """
@@ -108,12 +113,18 @@ topology_template:
     description: Persist xos-sample-gui-extension
 
     imports:
-       - custom_types/xosguiextension.yaml
+        - custom_types/node.yaml
+        - custom_types/xosguiextension.yaml
 
     topology_template:
       node_templates:
 
-        # UI Extension
+        should_stay:
+          type: tosca.nodes.Node
+          properties:
+            name: should_stay
+            must-exist: true
+
         test:
           type: tosca.nodes.XOSGuiExtension
           properties:
@@ -126,10 +137,10 @@ topology_template:
         parser.execute()
 
         # checking that the model has been saved
-        mock_delete.assert_called()
+        mock_model.assert_called_once()
 
         self.assertIsNotNone(parser.templates_by_model_name['test'])
-        self.assertEqual(parser.ordered_models_name, ['test'])
+        self.assertEqual(parser.ordered_models_name, ['test', 'should_stay'])
 
     @patch.dict(RESOURCES, mock_resources, clear=True)
     @patch.object(FakeSite.objects, 'filter', MagicMock(return_value=[FakeModel]))
