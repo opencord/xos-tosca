@@ -218,9 +218,15 @@ class TOSCA_Parser:
                     model = self.populate_dependencies(model, recipe.requirements, self.saved_model_by_name)
                     # [] save, update or delete
 
-                    if self.delete and not model.is_new:
+                    reference_only = False
+                    if 'must-exist' in data:
+                        reference_only = True
+
+                    if self.delete and not model.is_new and not reference_only:
+                        print "[XOS-Tosca] Deleting model %s[%s]" % (class_name, model.id)
                         model.delete()
                     elif not self.delete:
+                        print "[XOS-Tosca] Saving model %s[%s]" % (class_name, model.id)
                         model.save()
 
                     self.saved_model_by_name[recipe.name] = model
@@ -242,6 +248,7 @@ class TOSCA_Parser:
                 exception_msg = e._state.details
             raise Exception(exception_msg)
         except Exception, e:
+            print e
             raise Exception(e)
 
 
