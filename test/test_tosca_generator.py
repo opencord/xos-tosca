@@ -16,7 +16,7 @@
 
 import unittest
 import os
-from xosgenx.generator import XOSGenerator
+from xosgenx.generator import XOSProcessor
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 OUTPUT_DIR = os.path.join(current_dir, 'out');
@@ -49,7 +49,7 @@ class TOSCA_Generator_Test(unittest.TestCase):
         args.write_to_file = "single"
         args.dest_file = "basic.yaml"
         args.quiet = False
-        output = XOSGenerator.generate(args)
+        output = XOSProcessor.process(args)
         self.assertIn("name:", output)
         self.assertIn("files:", output)
 
@@ -77,7 +77,7 @@ class TOSCA_Generator_Test(unittest.TestCase):
         args.output = OUTPUT_DIR
         args.write_to_file = 'target'
         args.quiet = False
-        output = XOSGenerator.generate(args)
+        output = XOSProcessor.process(args)
         self.assertEqual(output.count("name:"), 4)
         self.assertIn("prop:", output)
 
