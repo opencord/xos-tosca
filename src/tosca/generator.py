@@ -16,7 +16,7 @@
 
 import os
 from default import TOSCA_DEFS_DIR, TOSCA_KEYS_DIR
-from xosgenx.generator import XOSGenerator
+from xosgenx.generator import XOSProcessor
 from xosapi.xos_grpc_client import Empty
 
 class Args:
@@ -43,7 +43,7 @@ class TOSCA_Generator:
             args.inputs = str(xproto.xproto)
             args.target = os.path.join(current_dir, 'xtarget/tosca.xtarget')
             args.write_to_file = 'target'
-            XOSGenerator.generate(args)
+            XOSProcessor.process(args)
             print "[XOS-TOSCA] Recipes generated in %s" % args.output
         except Exception as e:
             print "[XOS-TOSCA] Failed to generate TOSCA"
@@ -57,7 +57,7 @@ class TOSCA_Generator:
             args.target = os.path.join(current_dir, 'xtarget/tosca_keys.xtarget')
             args.write_to_file = 'single'
             args.dest_file = 'KEYS.py'
-            XOSGenerator.generate(args)
+            XOSProcessor.process(args)
             print "[XOS-TOSCA] TOSCA Keys generated in %s" % args.output
         except Exception as e:
             print "[XOS-TOSCA] Failed to generate TOSCA Keys"
