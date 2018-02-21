@@ -43,6 +43,11 @@ class Main:
     def start(self):
         print "[XOS-TOSCA] Starting"
 
+        # Handle race where web request can arrive before generation has occurred. This can happen when the process is
+        # restarted.
+        TOSCA_Generator()._clean()
+        TOSCA_Generator()._clean_keys()
+
         grpc_setup = GRPC_Client().start()
         grpc_setup.addCallback(self.generate_tosca)
 

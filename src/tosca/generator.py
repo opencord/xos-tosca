@@ -32,9 +32,15 @@ class TOSCA_Generator:
             if not f.startswith('.'):
                 os.remove(dir + '/' + f)
 
+    def _clean_keys(self, dir=TOSCA_KEYS_DIR):
+        keys_fn = os.path.join(dir, "KEYS.py")
+        if os.path.exists(keys_fn):
+            os.remove(keys_fn)
+
     def generate(self, client):
         print "[XOS-TOSCA] Generating TOSCA"
         self._clean()
+        self._clean_keys()
 
         try:
             xproto = client.utility.GetXproto(Empty())
