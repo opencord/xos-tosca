@@ -49,6 +49,7 @@ class GRPC_Client:
             self.client.session_change = True
 
         self.client = InsecureClient(endpoint=self.grpc_insecure_endpoint)
+        self.client.restart_on_disconnect = True
 
         self.client.set_reconnect_callback(functools.partial(deferred.callback, self.client))
         self.client.start()
@@ -66,6 +67,7 @@ class GRPC_Client:
         else:
             local_cert = Config.get('local_cert')
             client = SecureClient(endpoint=self.grpc_secure_endpoint, username=username, password=password, cacert=local_cert)
+            client.restart_on_disconnect = True
             client.set_reconnect_callback(functools.partial(self.setup_resources, client, key, deferred, recipe))
             client.start()
         return deferred

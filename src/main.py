@@ -43,6 +43,12 @@ class Main:
     def start(self):
         print "[XOS-TOSCA] Starting"
 
+        # Remove generated TOSCA and KEYS that may have been downloaded by a previous session. This is done here, rather
+        # than in the generator, to cover the case where the TOSCA engine is restarted and a web request is received
+        # and processed before generate_tosca() has completed. 
+        TOSCA_Generator().clean()
+        TOSCA_Generator().clean_keys()
+
         grpc_setup = GRPC_Client().start()
         grpc_setup.addCallback(self.generate_tosca)
 
