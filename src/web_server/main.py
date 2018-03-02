@@ -44,7 +44,9 @@ class TOSCA_WebServer:
     def errorCallback(self, failure, request):
         request.setResponseCode(500)
         try:
-            return failure.getErrorMessage()
+            f = failure.getErrorMessage()
+            print "[XOS-TOSCA] Error while loading TOSCA: \n\n", f
+            return f
         except:
             print failure
             return "Internal server error, please report this along with the failed recipe."
