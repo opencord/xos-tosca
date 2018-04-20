@@ -136,6 +136,8 @@ POST http://<head-node-ip>:<head-node-port>/xos-tosca/delete
 To load a recipe via `curl` you can use this command:
 
 ```shell
-curl -H "xos-username: xosadmin@opencord.org" -H "xos-password: <xos-password>" -X POST --data-binary @<path/to/file> http://<head-node-ip>:<head-node-port>/xos-tosca//run
+curl -H "xos-username: xosadmin@opencord.org" -H "xos-password: <xos-password>" -X POST --data-binary @<path/to/file> http://<head-node-ip>:<head-node-port>/xos-tosca/run
 ```
+
+> NOTE that if you're running this command from inside the head node, you should use the address `0.0.0.0:9102/run` as you're directly calling the container skipping the apache proxy that provides the `xos-tosca` endpoint.
 
