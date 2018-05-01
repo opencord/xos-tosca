@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "c57fe127_b4baeb1d",
+        "filename": "docs/README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 142,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2018-05-01T03:33:39Z",
+      "side": 1,
+      "message": "Stylistically in the rest of the docs we\u0027ve been writing this without the \u0027that\u0027, like:\n\n     \u003e NOTE: If.... \n\nThe new documentation lint job wants non-code, non-URL lines wrapped at 80 characters.",
+      "range": {
+        "startLine": 141,
+        "startChar": 0,
+        "endLine": 142,
+        "endChar": 222
+      },
+      "revId": "d0f1038437463a721f91b10ce1b9ec2769a8519b",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    }
+  ]
+}
