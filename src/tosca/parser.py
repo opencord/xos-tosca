@@ -233,6 +233,7 @@ class TOSCA_Parser:
                         print "[XOS-Tosca] Saving model %s[%s]" % (class_name, model.id)
                         model.save()
 
+
                     self.saved_model_by_name[recipe.name] = model
                 except Exception, e:
                     print "[XOS-TOSCA] Failed to save model: %s [%s]" % (class_name, recipe.name)
@@ -248,7 +249,10 @@ class TOSCA_Parser:
 
         except _Rendezvous, e:
             try:
-                exception_msg = json.loads(e._state.details)["error"]
+                details = json.loads(e._state.details)
+                exception_msg = details["error"]
+                if "specific_error" in details:
+                    exception_msg = "%s: %s" % (exception_msg, details["specific_error"])
             except Exception:
                 exception_msg = e._state.details
             raise Exception(exception_msg)

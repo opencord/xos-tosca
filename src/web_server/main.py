@@ -38,7 +38,10 @@ class TOSCA_WebServer:
 
     def execute_tosca(self, recipe):
         self.parser.execute()
-        response_text = "Created models: %s" % str(self.parser.ordered_models_name)
+        if self.parser.delete:
+            response_text = "Deleted models: %s" % str(self.parser.ordered_models_name)
+        else:
+            response_text = "Created models: %s" % str(self.parser.ordered_models_name)
         return response_text
 
     def errorCallback(self, failure, request):
