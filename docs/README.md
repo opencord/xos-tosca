@@ -4,8 +4,6 @@ A TOSCA interface is available for configuring and controlling CORD. It is
 auto-generated from the set of [models](../xos/README.md) configured into the
 POD manifest, and includes both core and service-specific models.
 
-> NOTE: In `CORD-4.0` this `TOSCA` interface is released as an `alpha` feature.
-
 ## What is TOSCA?
 
 Topology and Orchestration Specification for Cloud Applications (TOSCA) is an
@@ -129,13 +127,15 @@ curl http://<head-node-ip>:<head-node-port>/xos-tosca/custom_type/site
 The `xos-tosca` container exposes two endpoint:
 
 ```shell
-POST http://<head-node-ip>:<head-node-port>/xos-tosca/run
-POST http://<head-node-ip>:<head-node-port>/xos-tosca/delete
+POST http://<cluster-ip>:<tosca-port>/run
+POST http://<cluster-ip>:<tosca-port>/delete
 ```
 
 To load a recipe via `curl` you can use this command:
 
 ```shell
-curl -H "xos-username: xosadmin@opencord.org" -H "xos-password: <xos-password>" -X POST --data-binary @<path/to/file> http://<head-node-ip>:<head-node-port>/xos-tosca//run
+curl -H "xos-username: xosadmin@opencord.org" -H "xos-password: <xos-password>" -X POST --data-binary @<path/to/file> http://<cluster-ip>:<tosca-port>/run
 ```
+
+_If you installed the `xos-core` charts without modifications, the `tosca-port` is `30007`
 
