@@ -122,6 +122,9 @@ For examples, to site the TOSCA spec of the Site model, you can use the URL:
 curl http://<head-node-ip>:<head-node-port>/xos-tosca/custom_type/site
 ```
 
+If you have a running `xos-tosca` container you can also find generated copies
+of the specs in `/opt/xos-tosca/src/tosca/custom_types`.
+
 ### How to load a TOSCA recipe in the system
 
 The `xos-tosca` container exposes two endpoint:
