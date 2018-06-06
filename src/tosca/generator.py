@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from xosconfig import Config
+from multistructlog import create_logger
+log = create_logger(Config().get('logging'))
 
 import os
 from default import TOSCA_DEFS_DIR, TOSCA_KEYS_DIR
@@ -38,7 +41,7 @@ class TOSCA_Generator:
             os.remove(keys_fn)
 
     def generate(self, client):
-        print "[XOS-TOSCA] Generating TOSCA"
+        log.info("[XOS-TOSCA] Generating TOSCA")
 
         try:
             xproto = client.utility.GetXproto(Empty())
@@ -48,10 +51,9 @@ class TOSCA_Generator:
             args.target = os.path.join(current_dir, 'xtarget/tosca.xtarget')
             args.write_to_file = 'target'
             XOSProcessor.process(args)
-            print "[XOS-TOSCA] Recipes generated in %s" % args.output
+            log.info("[XOS-TOSCA] Recipes generated in %s" % args.output)
         except Exception as e:
-            print "[XOS-TOSCA] Failed to generate TOSCA"
-            print e
+            log.exception("[XOS-TOSCA] Failed to generate TOSCA")
 
         try:
             xproto = client.utility.GetXproto(Empty())
@@ -62,8 +64,7 @@ class TOSCA_Generator:
             args.write_to_file = 'single'
             args.dest_file = 'KEYS.py'
             XOSProcessor.process(args)
-            print "[XOS-TOSCA] TOSCA Keys generated in %s" % args.output
+            log.info("[XOS-TOSCA] TOSCA Keys generated in %s" % args.output)
         except Exception as e:
-            print "[XOS-TOSCA] Failed to generate TOSCA Keys"
-            print e
+            log.exception("[XOS-TOSCA] Failed to generate TOSCA Keys")
 

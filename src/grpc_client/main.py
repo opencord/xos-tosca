@@ -21,6 +21,10 @@ from resources import RESOURCES
 from xosconfig import Config
 from twisted.internet import reactor
 
+from xosconfig import Config
+from multistructlog import create_logger
+log = create_logger(Config().get('logging'))
+
 class GRPC_Client:
     def __init__(self):
         self.client = None
@@ -32,7 +36,7 @@ class GRPC_Client:
         self.grpc_insecure_endpoint = insecure + ":50055"
 
     def setup_resources(self, client, key, deferred, recipe):
-        print "[XOS-TOSCA] Loading resources"
+        log.info("[XOS-TOSCA] Loading resources for authenticated user")
         if key not in RESOURCES:
             RESOURCES[key] = {}
         for k in client.xos_orm.all_model_names:
@@ -40,7 +44,7 @@ class GRPC_Client:
         reactor.callLater(0, deferred.callback, recipe)
 
     def start(self):
-        print "[XOS-TOSCA] Connecting to xos-core"
+        log.info("[XOS-TOSCA] Connecting to xos-core")
 
         deferred = defer.Deferred()
 

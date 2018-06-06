@@ -14,6 +14,10 @@
 # limitations under the License.
 
 
+from xosconfig import Config
+from multistructlog import create_logger
+log = create_logger(Config().get('logging'))
+
 from toscaparser.tosca_template import ToscaTemplate, ValidationError
 from default import TOSCA_RECIPES_DIR
 from grpc_client.resources import RESOURCES
@@ -227,17 +231,16 @@ class TOSCA_Parser:
                         reference_only = True
 
                     if self.delete and not model.is_new and not reference_only:
-                        print "[XOS-Tosca] Deleting model %s[%s]" % (class_name, model.id)
+                        log.info("[XOS-Tosca] Deleting model %s[%s]" % (class_name, model.id))
                         model.delete()
                     elif not self.delete:
-                        print "[XOS-Tosca] Saving model %s[%s]" % (class_name, model.id)
+                        log.info("[XOS-Tosca] Saving model %s[%s]" % (class_name, model.id))
                         model.save()
 
 
                     self.saved_model_by_name[recipe.name] = model
                 except Exception, e:
-                    print "[XOS-TOSCA] Failed to save model: %s [%s]" % (class_name, recipe.name)
-                    traceback.print_exc()
+                    log.exception("[XOS-TOSCA] Failed to save model: %s [%s]" % (class_name, recipe.name))
                     raise e
 
         except ValidationError as e:
@@ -257,7 +260,7 @@ class TOSCA_Parser:
                 exception_msg = e._state.details
             raise Exception(exception_msg)
         except Exception, e:
-            print e
+            log.exception(e)
             raise Exception(e)
 
 
