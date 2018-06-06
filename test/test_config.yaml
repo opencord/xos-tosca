@@ -1,0 +1,13 @@
+name: xos-tosca
+gprc_endpoint: "xos-core"
+local_cert: /usr/local/share/ca-certificates/local_certs.crt
+logging:
+  version: 1
+  handlers:
+    console:
+      class: logging.StreamHandler
+  loggers:
+    'multistructlog':
+      handlers:
+        - console
+      level: ERROR

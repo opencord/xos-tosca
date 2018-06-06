@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from xosconfig import Config
+from multistructlog import create_logger
+log = create_logger(Config().get('logging'))
 
 from grpc_client.main import GRPC_Client
 from klein import Klein
@@ -48,10 +51,10 @@ class TOSCA_WebServer:
         request.setResponseCode(500)
         try:
             f = failure.getErrorMessage()
-            print "[XOS-TOSCA] Error while loading TOSCA: \n\n", f
+            log.info("[XOS-TOSCA] Error while loading TOSCA: \n\n", failure=f)
             return f
-        except:
-            print failure
+        except Exception:
+            log.info("[XOS-TOSCA] Fatal Error: \n\n", failure=failure)
             return "Internal server error, please report this along with the failed recipe."
 
     @app.route('/', methods=['GET'])

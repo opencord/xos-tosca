@@ -15,17 +15,21 @@
 
 
 import os
-from grpc_client.main import GRPC_Client
-from tosca.generator import TOSCA_Generator
-from web_server.main import TOSCA_WebServer
-from twisted.internet import defer
 from xosconfig import Config
+from multistructlog import create_logger
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 config_file = os.path.join(current_dir, 'xos-tosca.config.yaml')
 config_schema = os.path.join(current_dir, 'xos-tosca-config-schema.yaml')
 
 Config.init(config_file, config_schema)
+log = create_logger(Config().get('logging'))
+
+from grpc_client.main import GRPC_Client
+from tosca.generator import TOSCA_Generator
+from web_server.main import TOSCA_WebServer
+from twisted.internet import defer
+
 
 class Main:
 
@@ -41,7 +45,7 @@ class Main:
         return deferred
 
     def start(self):
-        print "[XOS-TOSCA] Starting"
+        log.info("[XOS-TOSCA] Starting")
 
         # Remove generated TOSCA and KEYS that may have been downloaded by a previous session. This is done here, rather
         # than in the generator, to cover the case where the TOSCA engine is restarted and a web request is received

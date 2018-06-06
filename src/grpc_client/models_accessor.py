@@ -13,6 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from xosconfig import Config
+from multistructlog import create_logger
+log = create_logger(Config().get('logging'))
 
 from resources import RESOURCES
 
@@ -69,15 +72,15 @@ class GRPCModelsAccessor:
         models = cls.objects.filter(**filter)
 
         if len(models) == 1:
-            print "[XOS-Tosca] Model of class %s and properties %s already exist, retrieving instance..." % (class_name, str(filter))
             model = models[0]
+            log.info("[XOS-Tosca] Model of class %s and properties %s already exist, retrieving instance..." % (class_name, str(filter)), model=model)
         elif len(models) == 0:
 
             if 'must-exist' in data and data['must-exist']:
                 raise Exception("[XOS-TOSCA] Model of class %s and properties %s has property 'must-exist' but cannot be found" % (class_name, str(filter)))
 
             model = cls.objects.new()
-            print "[XOS-Tosca] Model (%s) is new, creating new instance..." % str(filter)
+            log.info("[XOS-Tosca] Model (%s) is new, creating new instance..." % str(filter))
         else:
             raise Exception("[XOS-Tosca] Model of class %s and properties %s has multiple instances, I can't handle it" % (class_name, str(filter)))
 

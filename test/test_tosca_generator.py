@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
+from helpers import *
 import unittest
 import os
 from xosgenx.generator import XOSProcessor
