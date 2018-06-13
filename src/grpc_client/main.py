@@ -72,6 +72,9 @@ class GRPC_Client:
             local_cert = Config.get('local_cert')
             client = SecureClient(endpoint=self.grpc_secure_endpoint, username=username, password=password, cacert=local_cert)
             client.restart_on_disconnect = True
+            # SecureClient is preceeded by an insecure client, so treat all secure clients as previously connected
+            # See CORD-3152
+            client.was_connected = True
             client.set_reconnect_callback(functools.partial(self.setup_resources, client, key, deferred, recipe))
             client.start()
         return deferred
