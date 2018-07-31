@@ -1,0 +1,142 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b8646b48_61f99c8d",
+        "filename": "docs/README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2018-07-31T22:37:58Z",
+      "side": 1,
+      "message": "exposes",
+      "range": {
+        "startLine": 25,
+        "startChar": 56,
+        "endLine": 25,
+        "endChar": 62
+      },
+      "revId": "04ca2261b6d469a566e7b302f4166e14deb4f4c5",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fdf87dfd_69024704",
+        "filename": "docs/README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 25,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2018-07-31T22:37:58Z",
+      "side": 1,
+      "message": "into XOS.",
+      "range": {
+        "startLine": 25,
+        "startChar": 104,
+        "endLine": 25,
+        "endChar": 16
+      },
+      "revId": "04ca2261b6d469a566e7b302f4166e14deb4f4c5",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "fad93b13_26bff2e7",
+        "filename": "docs/README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2018-07-31T22:37:58Z",
+      "side": 1,
+      "message": "is",
+      "range": {
+        "startLine": 26,
+        "startChar": 19,
+        "endLine": 26,
+        "endChar": 23
+      },
+      "revId": "04ca2261b6d469a566e7b302f4166e14deb4f4c5",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "51da0be4_bcd22786",
+        "filename": "docs/README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2018-07-31T22:37:58Z",
+      "side": 1,
+      "message": "pushes",
+      "range": {
+        "startLine": 26,
+        "startChar": 53,
+        "endLine": 26,
+        "endChar": 58
+      },
+      "revId": "04ca2261b6d469a566e7b302f4166e14deb4f4c5",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "7dcf981a_594eb24a",
+        "filename": "docs/README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2018-07-31T22:37:58Z",
+      "side": 1,
+      "message": "to, or into ?",
+      "range": {
+        "startLine": 26,
+        "startChar": 75,
+        "endLine": 26,
+        "endChar": 82
+      },
+      "revId": "04ca2261b6d469a566e7b302f4166e14deb4f4c5",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "80cc923c_1575ed6a",
+        "filename": "docs/README.md",
+        "patchSetId": 2
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000011
+      },
+      "writtenOn": "2018-07-31T22:37:58Z",
+      "side": 1,
+      "message": "exits.   \n\nmaybe also mention that it\u0027s usually run as a k8s job, instead of a  pod?",
+      "range": {
+        "startLine": 26,
+        "startChar": 104,
+        "endLine": 26,
+        "endChar": 108
+      },
+      "revId": "04ca2261b6d469a566e7b302f4166e14deb4f4c5",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": true
+    }
+  ]
+}
