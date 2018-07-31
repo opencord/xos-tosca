@@ -17,6 +17,14 @@ website.
 CORD extends the TOSCA specification to support custom models for services,
 allow operators to manage them with a simple and well-known YAML interface.
 
+## Difference between `xos-tosca` and `*-tosca-loader`
+
+When you deploy CORD using helm charts you'll notice that there are two containers
+that contains the name `tosca`. There is quite a big difference between them:
+
+- `xos-tosca` contains the TOSCA engine and parser, and exposes a REST api to let you push TOSCA recipes into XOS
+- `*-tosca-loader` is a convenience container that pushes a set of recipes into `xos-tosca` and then exits.
+
 ## Internals
 
 The `xos-tosca` container autogenerates the TOSCA interface starting from the
