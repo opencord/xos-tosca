@@ -12,7 +12,7 @@ WORKDIR ${CODE_DEST}
 COPY ${CODE_SOURCE}/ ${CODE_DEST}/
 
 # Install dependencies
-RUN pip install -r ${CODE_DEST}/pip_requirements.txt
+RUN pip install klein==16.12.0
 
 EXPOSE 9102
 

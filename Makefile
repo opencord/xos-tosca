@@ -1,5 +1,5 @@
 help:
-	@echo "tests: Run unit tests (if you're running local, you'll need to have virtual-env activated)"
+	@echo "tests: Run unit tests (need the xos dev virtual-env activated)"
 	@echo "tosca: Generate tosca definition from core.xproto"
 	@echo "build: Build the docker image for xos-tosca"
 	@echo "start: Run an xos-tosca container"
@@ -8,7 +8,7 @@ help:
 	@echo "test-delete: Delete a sample tosca recipe"
 
 tests: tosca
-	nosetests -s -v --with-id --with-coverage --cover-html --cover-erase --cover-xml --cover-package="grpc_client, tosca"
+	nose2 --verbose --coverage-report xml --coverage-report term --junit-xml
 
 build:
 	docker build -t xosproject/xos-tosca .

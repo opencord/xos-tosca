@@ -5,7 +5,8 @@ local_certs.crt
 src/tosca/tmp.yaml
 src/grpc_client/KEYS.py
 
-# Test Coverage
+# Test output
+nose2-junit.xml
 .coverage
 cover
 coverage.xml

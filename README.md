@@ -20,3 +20,15 @@ For support please refer to:
 **Wiki**<br/>
 [wiki.opencord.org](https://wiki.opencord.org/)
 
+
+## Testing
+
+To run tests, you must first create a virtualenv with the XOS dependencies:
+
+```shell
+cd ../xos
+./scripts/setup_venv.sh
+source venv-xos/bin/activate
+cd ../xos-tosca
+make tests
+```
