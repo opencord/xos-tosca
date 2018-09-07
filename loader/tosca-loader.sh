@@ -21,11 +21,12 @@ echo "Starting TOSCA loader using httpie version: $(http --version)"
 
 for recipe in /opt/tosca/*
 do
-  echo "Loading: $recipe"
-  http --check-status --ignore-stdin \
+  echo "Loading: $recipe at $(date -u '+%Y%m%d%H%M%SZ')"
+  http --timeout=300 --check-status --ignore-stdin \
        POST "http://xos-tosca:$XOS_TOSCA_SERVICE_PORT/run" \
        "xos-username:$XOS_USER" \
        "xos-password:$XOS_PASSWD" \
        "@$recipe" || exit 1
   echo ''
+  echo "Finished load at $(date -u '+%Y%m%d%H%M%SZ')"
 done
