@@ -51,6 +51,8 @@ class TOSCA_WebServer:
         request.setResponseCode(500)
         try:
             f = failure.getErrorMessage()
+            if f.startswith("XOSPermissionDenied"):
+                request.setResponseCode(401)
             log.info("[XOS-TOSCA] Error while loading TOSCA: \n\n", failure=f)
             return f
         except Exception:

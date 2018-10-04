@@ -23,7 +23,7 @@ from xosgenx.generator import XOSProcessor
 from xosapi.xos_grpc_client import Empty
 
 class Args:
-    pass
+    verbosity = 0
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 

@@ -23,7 +23,7 @@ OUTPUT_DIR = os.path.join(current_dir, 'out');
 print OUTPUT_DIR
 
 class FakeArgs:
-    pass
+    verbosity = 0
 
 class TOSCA_Generator_Test(unittest.TestCase):
 
