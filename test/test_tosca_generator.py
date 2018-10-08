@@ -16,14 +16,11 @@
 from helpers import *
 import unittest
 import os
-from xosgenx.generator import XOSProcessor
+from xosgenx.generator import XOSProcessor, XOSProcessorArgs
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 OUTPUT_DIR = os.path.join(current_dir, 'out');
 print OUTPUT_DIR
-
-class FakeArgs:
-    verbosity = 0
 
 class TOSCA_Generator_Test(unittest.TestCase):
 
@@ -42,13 +39,12 @@ class TOSCA_Generator_Test(unittest.TestCase):
                  required string files = 2 [max_length = 1024, content_type = "stripped", blank = False, help_text = "List of comma separated file composing the view", null = False, db_index = False];
             }
             """
-        args = FakeArgs()
-        args.inputs = xproto
-        args.target = os.path.join(current_dir, '../src/tosca/xtarget/tosca.xtarget')
-        args.output = OUTPUT_DIR
-        args.write_to_file = "single"
-        args.dest_file = "basic.yaml"
-        args.quiet = False
+        args = XOSProcessorArgs(inputs = xproto,
+                                target = os.path.join(current_dir, '../src/tosca/xtarget/tosca.xtarget'),
+                                output = OUTPUT_DIR,
+                                write_to_file = "single",
+                                dest_file = "basic.yaml",
+                                quiet = False)
         output = XOSProcessor.process(args)
         self.assertIn("name:", output)
         self.assertIn("files:", output)
@@ -71,12 +67,11 @@ class TOSCA_Generator_Test(unittest.TestCase):
                  required string prop = 1 [max_length = 200, content_type = "stripped", blank = False, null = False, db_index = False];
             }
             """
-        args = FakeArgs()
-        args.inputs = xproto
-        args.target = os.path.join(current_dir, '../src/tosca/xtarget/tosca.xtarget')
-        args.output = OUTPUT_DIR
-        args.write_to_file = 'target'
-        args.quiet = False
+        args = XOSProcessorArgs(inputs = xproto,
+                                target = os.path.join(current_dir, '../src/tosca/xtarget/tosca.xtarget'),
+                                output = OUTPUT_DIR,
+                                write_to_file = 'target',
+                                quiet = False)
         output = XOSProcessor.process(args)
         self.assertEqual(output.count("name:"), 4)
         self.assertIn("prop:", output)
