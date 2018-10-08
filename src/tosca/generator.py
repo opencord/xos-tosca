@@ -19,11 +19,8 @@ log = create_logger(Config().get('logging'))
 
 import os
 from default import TOSCA_DEFS_DIR, TOSCA_KEYS_DIR
-from xosgenx.generator import XOSProcessor
+from xosgenx.generator import XOSProcessor, XOSProcessorArgs
 from xosapi.xos_grpc_client import Empty
-
-class Args:
-    verbosity = 0
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 
@@ -45,11 +42,10 @@ class TOSCA_Generator:
 
         try:
             xproto = client.utility.GetXproto(Empty())
-            args = Args()
-            args.output = TOSCA_DEFS_DIR
-            args.inputs = str(xproto.xproto)
-            args.target = os.path.join(current_dir, 'xtarget/tosca.xtarget')
-            args.write_to_file = 'target'
+            args = XOSProcessorArgs(output = TOSCA_DEFS_DIR,
+                                    inputs = str(xproto.xproto),
+                                    target = os.path.join(current_dir, 'xtarget/tosca.xtarget'),
+                                    write_to_file = 'target')
             XOSProcessor.process(args)
             log.info("[XOS-TOSCA] Recipes generated in %s" % args.output)
         except Exception as e:
@@ -57,14 +53,12 @@ class TOSCA_Generator:
 
         try:
             xproto = client.utility.GetXproto(Empty())
-            args = Args()
-            args.output = TOSCA_KEYS_DIR
-            args.inputs = str(xproto.xproto)
-            args.target = os.path.join(current_dir, 'xtarget/tosca_keys.xtarget')
-            args.write_to_file = 'single'
-            args.dest_file = 'KEYS.py'
+            args = XOSProcessorArgs(output = TOSCA_KEYS_DIR,
+                                    inputs = str(xproto.xproto),
+                                    target = os.path.join(current_dir, 'xtarget/tosca_keys.xtarget'),
+                                    write_to_file = 'single',
+                                    dest_file = 'KEYS.py')
             XOSProcessor.process(args)
             log.info("[XOS-TOSCA] TOSCA Keys generated in %s" % args.output)
         except Exception as e:
             log.exception("[XOS-TOSCA] Failed to generate TOSCA Keys")
-
