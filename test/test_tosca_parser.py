@@ -219,20 +219,3 @@ ImportError: with some message
 InvalidTypeError: with some message
 TypeMismatchError: with some message
 """)
-
-    def test_save_recipe_to_tmp_file(self):
-        """
-        [TOSCA_Parser] save_recipe_to_tmp_file: should save a TOSCA recipe to a tmp file
-        """
-        parser = TOSCA_Parser('', 'user', 'pass')
-        parser.recipe_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'test_tmp.yaml')
-
-        parser.save_recipe_to_tmp_file('my tosca')
-
-        self.assertTrue(os.path.exists(parser.recipe_file))
-
-        content = open(parser.recipe_file).read()
-
-        self.assertEqual(content, 'my tosca')
-
-        os.remove(parser.recipe_file)

@@ -14,6 +14,8 @@
 # limitations under the License.
 
 
+import os
+from tempfile import NamedTemporaryFile
 from xosconfig import Config
 from multistructlog import create_logger
 log = create_logger(Config().get('logging'))
@@ -127,11 +129,6 @@ class TOSCA_Parser:
         else:
             return msg
 
-    def save_recipe_to_tmp_file(self, recipe):
-        tmp_file = open(self.recipe_file, 'w')
-        tmp_file.write(recipe)
-        tmp_file.close()
-
     @staticmethod
     def get_tosca_models_by_name(template):
         models_by_name = {}
@@ -183,7 +180,6 @@ class TOSCA_Parser:
         self.saved_model_by_name = {}
 
         self.ordered_models_template = []
-        self.recipe_file = TOSCA_RECIPES_DIR + '/tmp.yaml'
 
         self.recipe = recipe
 
@@ -191,9 +187,17 @@ class TOSCA_Parser:
 
         try:
             # [] save the recipe to a tmp file
-            self.save_recipe_to_tmp_file(self.recipe)
-            # [] parse the recipe with TOSCA Parse
-            self.template = ToscaTemplate(self.recipe_file)
+            with NamedTemporaryFile(delete=False, suffix=".yaml", dir=TOSCA_RECIPES_DIR) as recipe_file:
+                try:
+                    recipe_file.write(self.recipe)
+                    recipe_file.close()
+
+                    # [] parse the recipe with TOSCA Parse
+                    self.template = ToscaTemplate(recipe_file.name)
+                finally:
+                    # [] Make sure the temporary file is cleaned up
+                    os.remove(recipe_file.name)
+
             # [] get all models in the recipe
             self.templates_by_model_name = self.get_tosca_models_by_name(self.template)
             # [] compute requirements
