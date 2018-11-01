@@ -1,7 +1,7 @@
 # docker build -t xosproject/xos-tosca:candidate .
 
 # xosproject/xos-tosca
-FROM xosproject/xos-client:2.1.19
+FROM xosproject/xos-client:2.1.22
 
 # Set environment variables
 ENV CODE_SOURCE .
