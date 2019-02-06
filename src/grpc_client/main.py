@@ -35,13 +35,13 @@ class GRPC_Client:
         self.grpc_secure_endpoint = secure + ":50051"
         self.grpc_insecure_endpoint = insecure + ":50055"
 
-    def setup_resources(self, client, key, deferred, recipe):
+    def setup_resources(self, client, key, deferred, arg):
         log.info("[XOS-TOSCA] Loading resources for authenticated user")
         if key not in RESOURCES:
             RESOURCES[key] = {}
         for k in client.xos_orm.all_model_names:
             RESOURCES[key][k] = getattr(client.xos_orm, k)
-        reactor.callLater(0, deferred.callback, recipe)
+        reactor.callLater(0, deferred.callback, arg)
 
     def start(self):
         log.info("[XOS-TOSCA] Connecting to xos-core")
@@ -60,14 +60,14 @@ class GRPC_Client:
 
         return deferred
 
-    def create_secure_client(self, username, password, recipe):
+    def create_secure_client(self, username, password, arg):
         """
         This method will check if this combination of username/password already has stored orm classes in RESOURCES, otherwise create them
         """
         deferred = defer.Deferred()
         key = "%s~%s" % (username, password)
         if key in RESOURCES:
-            reactor.callLater(0, deferred.callback, recipe)
+            reactor.callLater(0, deferred.callback, arg)
         else:
             local_cert = Config.get('local_cert')
             client = SecureClient(endpoint=self.grpc_secure_endpoint, username=username, password=password, cacert=local_cert)
@@ -75,6 +75,6 @@ class GRPC_Client:
             # SecureClient is preceeded by an insecure client, so treat all secure clients as previously connected
             # See CORD-3152
             client.was_connected = True
-            client.set_reconnect_callback(functools.partial(self.setup_resources, client, key, deferred, recipe))
+            client.set_reconnect_callback(functools.partial(self.setup_resources, client, key, deferred, arg))
             client.start()
         return deferred
