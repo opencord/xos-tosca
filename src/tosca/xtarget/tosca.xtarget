@@ -12,7 +12,7 @@ node_types:
     #     properties:
     #       must-exist: true # optional to reference models created in other recipes
 {%- for f in (m.fields + xproto_base_fields(m, proto.message_table)) | sort(attribute='name') %}
-{%- if not f.link and xproto_tosca_required(f.options.null, f.options.blank, f.options.default) %}
+{%- if not f.link and xproto_tosca_required(f.options.null, f.options.blank, f.options.default, f.options.modifier) %}
     #       {{ f.name }}: <value>
 {%- endif -%}
 {%- endfor %}
@@ -34,7 +34,7 @@ node_types:
             {%- if not f.link -%}
             {{ f.name }}:
                 type: {{ xproto_tosca_field_type(f.type) }}
-                required: {{ xproto_tosca_required(f.options.null, f.options.blank, f.options.default) }}
+                required: {{ xproto_tosca_required(f.options.null, f.options.blank, f.options.default, f.options.modifier) }}
                 description: {{ f.options.help_text }}
             {% endif %}
             {%- endfor %}

@@ -35,7 +35,7 @@ class FakeGuiExt:
 class FakeSite:
     objects = FakeObj
 
-class FakeInstance:
+class FakePrivilege:
     objects = FakeObj
 
 class FakeUser:
@@ -52,7 +52,7 @@ mock_resources["%s~%s" % (USERNAME, PASSWORD)] = {
     'XOSGuiExtension': FakeGuiExt,
     'Site': FakeSite,
     'User': FakeUser,
-    'Instance': FakeInstance,
+    'Privilege': FakePrivilege,
     'Node': FakeNode
 }
 
@@ -238,7 +238,7 @@ topology_template:
         self.assertEqual(e.exception.message.message, "[XOS-TOSCA] Model of class Site and properties {'name': 'Open Networking Lab'} has property 'must-exist' but cannot be found")
 
     @patch.dict(RESOURCES, mock_resources, clear=True)
-    @patch.object(FakeInstance.objects, 'filter', MagicMock(return_value=[FakeModel]))
+    @patch.object(FakePrivilege.objects, 'filter', MagicMock(return_value=[FakeModel]))
     @patch.object(FakeModel, 'save')
     def test_number_param(self, mock_save):
         """
@@ -250,17 +250,16 @@ topology_template:
                 description: Create a new site with one user
 
                 imports:
-                   - custom_types/instance.yaml
+                   - custom_types/privilege.yaml
 
                 topology_template:
                   node_templates:
 
-                    # Site
-                    instance#test_instance:
-                      type: tosca.nodes.Instance
+                    privilege#test_privilege:
+                      type: tosca.nodes.Privilege
                       properties:
-                        name: test_instance
-                        numberCores: 10
+                        permission: whatever
+                        accessor_id: 3
                 """
         parser = TOSCA_Parser(recipe, USERNAME, PASSWORD)
         parser.execute()
@@ -269,6 +268,6 @@ topology_template:
         mock_save.assert_called()
 
         # check that the model was saved with the expected values
-        saved_model = parser.saved_model_by_name['instance#test_instance']
-        self.assertEqual(saved_model.name, 'test_instance')
-        self.assertEqual(saved_model.numberCores, 10)
+        saved_model = parser.saved_model_by_name['privilege#test_privilege']
+        self.assertEqual(saved_model.permission, 'whatever')
+        self.assertEqual(saved_model.accessor_id, 3)
