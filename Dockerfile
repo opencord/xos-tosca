@@ -2,7 +2,7 @@
 
 # xosproject/xos-tosca
 
-FROM xosproject/xos-client:2.2.11
+FROM xosproject/xos-client:3.0.0
 
 # Set environment variables
 ENV CODE_SOURCE .
