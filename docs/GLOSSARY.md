@@ -1,2 +1,0 @@
-# XOS-TOSCA Glossary
-
