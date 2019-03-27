@@ -1,4 +1,3 @@
-
 # Copyright 2017-present Open Networking Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,8 +13,12 @@
 # limitations under the License.
 
 
+from __future__ import absolute_import
+
 import os
 
 TOSCA_DEFS_DIR = os.path.dirname(os.path.realpath(__file__)) + "/custom_types"
 TOSCA_RECIPES_DIR = os.path.dirname(os.path.realpath(__file__)) + "/"
-TOSCA_KEYS_DIR = os.path.abspath(os.path.dirname(os.path.realpath(__file__)) + "/../grpc_client")
+TOSCA_KEYS_DIR = os.path.abspath(
+    os.path.dirname(os.path.realpath(__file__)) + "/../grpc_client"
+)

@@ -1,4 +1,3 @@
-
 # Copyright 2017-present Open Networking Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,15 +12,23 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from helpers import *
+from __future__ import absolute_import
+from . import helpers  # noqa: F401
 import unittest
-from mock import patch, MagicMock
+
+try:  # python 3
+    from unittest.mock import patch, MagicMock
+except ImportError:  # python 2
+    from mock import patch, MagicMock
+
 from tosca.parser import TOSCA_Parser
 from grpc_client.resources import RESOURCES
+
 
 class FakeObj:
     new = None
     filter = None
+
 
 class FakeModel:
     save = None
@@ -29,38 +36,44 @@ class FakeModel:
     is_new = False
     id = 1
 
+
 class FakeGuiExt:
     objects = FakeObj
+
 
 class FakeSite:
     objects = FakeObj
 
+
 class FakePrivilege:
     objects = FakeObj
+
 
 class FakeUser:
     objects = FakeObj
 
+
 class FakeNode:
     objects = FakeObj
+
 
 USERNAME = "username"
 PASSWORD = "pass"
 
 mock_resources = {}
 mock_resources["%s~%s" % (USERNAME, PASSWORD)] = {
-    'XOSGuiExtension': FakeGuiExt,
-    'Site': FakeSite,
-    'User': FakeUser,
-    'Privilege': FakePrivilege,
-    'Node': FakeNode
+    "XOSGuiExtension": FakeGuiExt,
+    "Site": FakeSite,
+    "User": FakeUser,
+    "Privilege": FakePrivilege,
+    "Node": FakeNode,
 }
 
-class TOSCA_Parser_E2E(unittest.TestCase):
 
+class TOSCA_Parser_E2E(unittest.TestCase):
     @patch.dict(RESOURCES, mock_resources, clear=True)
-    @patch.object(FakeGuiExt.objects, 'filter', MagicMock(return_value=[FakeModel]))
-    @patch.object(FakeModel, 'save')
+    @patch.object(FakeGuiExt.objects, "filter", MagicMock(return_value=[FakeModel]))
+    @patch.object(FakeModel, "save")
     def test_basic_creation(self, mock_save):
         """
         [TOSCA_Parser] Should save models defined in a TOSCA recipe
@@ -89,20 +102,23 @@ topology_template:
         parser.execute()
 
         # checking that the model has been saved
-        mock_save.assert_called()
+        mock_save.assert_called_with()
 
-        self.assertIsNotNone(parser.templates_by_model_name['test'])
-        self.assertEqual(parser.ordered_models_name, ['test'])
+        self.assertIsNotNone(parser.templates_by_model_name["test"])
+        self.assertEqual(parser.ordered_models_name, ["test"])
 
         # check that the model was saved with the expected values
-        saved_model = parser.saved_model_by_name['test']
-        self.assertEqual(saved_model.name, 'test')
-        self.assertEqual(saved_model.files, '/spa/extensions/test/vendor.js, /spa/extensions/test/app.js')
+        saved_model = parser.saved_model_by_name["test"]
+        self.assertEqual(saved_model.name, "test")
+        self.assertEqual(
+            saved_model.files,
+            "/spa/extensions/test/vendor.js, /spa/extensions/test/app.js",
+        )
 
     @patch.dict(RESOURCES, mock_resources, clear=True)
-    @patch.object(FakeGuiExt.objects, 'filter', MagicMock(return_value=[FakeModel]))
-    @patch.object(FakeNode.objects, 'filter', MagicMock(return_value=[FakeModel]))
-    @patch.object(FakeModel, 'delete')
+    @patch.object(FakeGuiExt.objects, "filter", MagicMock(return_value=[FakeModel]))
+    @patch.object(FakeNode.objects, "filter", MagicMock(return_value=[FakeModel]))
+    @patch.object(FakeModel, "delete")
     def test_basic_deletion(self, mock_model):
         """
         [TOSCA_Parser] Should delete models defined in a TOSCA recipe
@@ -137,15 +153,15 @@ topology_template:
         parser.execute()
 
         # checking that the model has been saved
-        mock_model.assert_called_once()
+        mock_model.assert_called_once_with()
 
-        self.assertIsNotNone(parser.templates_by_model_name['test'])
-        self.assertEqual(parser.ordered_models_name, ['test', 'should_stay'])
+        self.assertIsNotNone(parser.templates_by_model_name["test"])
+        self.assertEqual(parser.ordered_models_name, ["should_stay", "test"])
 
     @patch.dict(RESOURCES, mock_resources, clear=True)
-    @patch.object(FakeSite.objects, 'filter', MagicMock(return_value=[FakeModel]))
-    @patch.object(FakeUser.objects, 'filter', MagicMock(return_value=[FakeModel]))
-    @patch.object(FakeModel, 'save')
+    @patch.object(FakeSite.objects, "filter", MagicMock(return_value=[FakeModel]))
+    @patch.object(FakeUser.objects, "filter", MagicMock(return_value=[FakeModel]))
+    @patch.object(FakeModel, "save")
     def test_related_models_creation(self, mock_save):
         """
         [TOSCA_Parser] Should save related models defined in a TOSCA recipe
@@ -193,20 +209,20 @@ topology_template:
 
         self.assertEqual(mock_save.call_count, 2)
 
-        self.assertIsNotNone(parser.templates_by_model_name['site_onlab'])
-        self.assertIsNotNone(parser.templates_by_model_name['usertest'])
-        self.assertEqual(parser.ordered_models_name, ['site_onlab', 'usertest'])
+        self.assertIsNotNone(parser.templates_by_model_name["site_onlab"])
+        self.assertIsNotNone(parser.templates_by_model_name["usertest"])
+        self.assertEqual(parser.ordered_models_name, ["site_onlab", "usertest"])
 
         # check that the model was saved with the expected values
-        saved_site = parser.saved_model_by_name['site_onlab']
-        self.assertEqual(saved_site.name, 'Open Networking Lab')
+        saved_site = parser.saved_model_by_name["site_onlab"]
+        self.assertEqual(saved_site.name, "Open Networking Lab")
 
-        saved_user = parser.saved_model_by_name['usertest']
-        self.assertEqual(saved_user.firstname, 'User')
+        saved_user = parser.saved_model_by_name["usertest"]
+        self.assertEqual(saved_user.firstname, "User")
         self.assertEqual(saved_user.site_id, 1)
 
     @patch.dict(RESOURCES, mock_resources, clear=True)
-    @patch.object(FakeSite.objects, 'filter', MagicMock(return_value=[]))
+    @patch.object(FakeSite.objects, "filter", MagicMock(return_value=[]))
     def test_must_exist_fail(self):
         """
         [TOSCA_Parser] Should throw an error if an object with 'must_exist' does not exist
@@ -235,11 +251,16 @@ topology_template:
         with self.assertRaises(Exception) as e:
             parser.execute()
 
-        self.assertEqual(e.exception.message.message, "[XOS-TOSCA] Model of class Site and properties {'name': 'Open Networking Lab'} has property 'must-exist' but cannot be found")
+        self.assertEqual(
+            str(e.exception),
+            "[XOS-TOSCA] Failed to save or delete model Site [site_onlab]: "
+            "[XOS-TOSCA] Model of class Site and properties {'name': 'Open Networking Lab'} "
+            "has property 'must-exist' but cannot be found"
+        )
 
     @patch.dict(RESOURCES, mock_resources, clear=True)
-    @patch.object(FakePrivilege.objects, 'filter', MagicMock(return_value=[FakeModel]))
-    @patch.object(FakeModel, 'save')
+    @patch.object(FakePrivilege.objects, "filter", MagicMock(return_value=[FakeModel]))
+    @patch.object(FakeModel, "save")
     def test_number_param(self, mock_save):
         """
         [TOSCA_Parser] Should correctly parse number parameters
@@ -265,9 +286,9 @@ topology_template:
         parser.execute()
 
         # checking that the model has been saved
-        mock_save.assert_called()
+        mock_save.assert_called_with()
 
         # check that the model was saved with the expected values
-        saved_model = parser.saved_model_by_name['privilege#test_privilege']
-        self.assertEqual(saved_model.permission, 'whatever')
+        saved_model = parser.saved_model_by_name["privilege#test_privilege"]
+        self.assertEqual(saved_model.permission, "whatever")
         self.assertEqual(saved_model.accessor_id, 3)
