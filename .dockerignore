@@ -4,3 +4,6 @@ docs
 test
 Dockerfile
 Makefile
+venv-tosca
+.coverage
+.tox
