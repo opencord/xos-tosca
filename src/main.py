@@ -1,4 +1,3 @@
-
 # Copyright 2017-present Open Networking Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,26 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
 
 import os
+
+from twisted.internet import defer
 from xosconfig import Config
 from multistructlog import create_logger
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
-config_file = os.path.join(current_dir, 'xos-tosca.config.yaml')
-config_schema = os.path.join(current_dir, 'xos-tosca-config-schema.yaml')
+config_file = os.path.join(current_dir, "xos-tosca.config.yaml")
+config_schema = os.path.join(current_dir, "xos-tosca-config-schema.yaml")
 
 Config.init(config_file, config_schema)
-log = create_logger(Config().get('logging'))
+log = create_logger(Config().get("logging"))
 
-from grpc_client.main import GRPC_Client
-from tosca.generator import TOSCA_Generator
-from web_server.main import TOSCA_WebServer
-from twisted.internet import defer
+# config needs to be init before these imports, thus E402
+from grpc_client import GRPC_Client  # noqa: E402
+from tosca import TOSCA_Generator  # noqa: E402
+from web_server import TOSCA_WebServer  # noqa: E402
 
 
 class Main:
-
     def __init__(self):
         self.grpc_client = None
 
@@ -47,9 +48,11 @@ class Main:
     def start(self):
         log.info("[XOS-TOSCA] Starting")
 
-        # Remove generated TOSCA and KEYS that may have been downloaded by a previous session. This is done here, rather
-        # than in the generator, to cover the case where the TOSCA engine is restarted and a web request is received
-        # and processed before generate_tosca() has completed. 
+        # Remove generated TOSCA and KEYS that may have been downloaded by a
+        # previous session. This is done here, rather than in the generator, to
+        # cover the case where the TOSCA engine is restarted and a web request
+        # is received and processed before generate_tosca() has completed.
+
         TOSCA_Generator().clean()
         TOSCA_Generator().clean_keys()
 
@@ -60,5 +63,5 @@ class Main:
         TOSCA_WebServer()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     Main().start()

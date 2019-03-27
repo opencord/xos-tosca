@@ -5,11 +5,12 @@ local_certs.crt
 src/tosca/tmp.yaml
 src/grpc_client/KEYS.py
 
-# Test output
-nose2-junit.xml
+# Test
 .coverage
-cover
+.tox
 coverage.xml
+nose2-results.xml
+venv-tosca
 
 # hack
 xos
