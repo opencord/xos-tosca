@@ -1,4 +1,3 @@
-
 # Copyright 2017-present Open Networking Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,23 +13,27 @@
 # limitations under the License.
 
 
-import functools
-from xosapi.xos_grpc_client import SecureClient, InsecureClient
-from twisted.internet import defer
-from resources import RESOURCES
-from xosconfig import Config
-from twisted.internet import reactor
+from __future__ import absolute_import
 
-from xosconfig import Config
+import functools
+
+from xosapi.xos_grpc_client import InsecureClient, SecureClient
+
 from multistructlog import create_logger
-log = create_logger(Config().get('logging'))
+from twisted.internet import defer, reactor
+from xosconfig import Config
+
+from .resources import RESOURCES
+
+log = create_logger(Config().get("logging"))
+
 
 class GRPC_Client:
     def __init__(self):
         self.client = None
 
-        insecure = Config.get('gprc_endpoint')
-        secure = Config.get('gprc_endpoint')
+        insecure = Config.get("gprc_endpoint")
+        secure = Config.get("gprc_endpoint")
 
         self.grpc_secure_endpoint = secure + ":50051"
         self.grpc_insecure_endpoint = insecure + ":50055"
@@ -55,26 +58,36 @@ class GRPC_Client:
         self.client = InsecureClient(endpoint=self.grpc_insecure_endpoint)
         self.client.restart_on_disconnect = True
 
-        self.client.set_reconnect_callback(functools.partial(deferred.callback, self.client))
+        self.client.set_reconnect_callback(
+            functools.partial(deferred.callback, self.client)
+        )
         self.client.start()
 
         return deferred
 
     def create_secure_client(self, username, password, arg):
         """
-        This method will check if this combination of username/password already has stored orm classes in RESOURCES, otherwise create them
+        This method will check if this combination of username/password already
+        has stored orm classes in RESOURCES, otherwise create them
         """
         deferred = defer.Deferred()
         key = "%s~%s" % (username, password)
         if key in RESOURCES:
             reactor.callLater(0, deferred.callback, arg)
         else:
-            local_cert = Config.get('local_cert')
-            client = SecureClient(endpoint=self.grpc_secure_endpoint, username=username, password=password, cacert=local_cert)
+            local_cert = Config.get("local_cert")
+            client = SecureClient(
+                endpoint=self.grpc_secure_endpoint,
+                username=username,
+                password=password,
+                cacert=local_cert,
+            )
             client.restart_on_disconnect = True
             # SecureClient is preceeded by an insecure client, so treat all secure clients as previously connected
             # See CORD-3152
             client.was_connected = True
-            client.set_reconnect_callback(functools.partial(self.setup_resources, client, key, deferred, arg))
+            client.set_reconnect_callback(
+                functools.partial(self.setup_resources, client, key, deferred, arg)
+            )
             client.start()
         return deferred

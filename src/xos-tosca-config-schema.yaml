@@ -1,4 +1,4 @@
-
+---
 # Copyright 2017-present Open Networking Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,16 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 map:
   name:
     type: str
-    required: True
+    required: true
   gprc_endpoint:
     type: str
-    required: True
+    required: true
   local_cert:
     type: str
-    required: True
+    required: true
   logging:
     type: any

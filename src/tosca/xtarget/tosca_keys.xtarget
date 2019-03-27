@@ -3,3 +3,4 @@ TOSCA_KEYS = {
     '{{ m.name }}': {{ xproto_fields_to_tosca_keys(m.fields + xproto_base_fields(m, proto.message_table), m) }},
 {%- endfor %}
 }
+

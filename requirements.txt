@@ -1,0 +1,4 @@
+tosca-parser~=1.4.0
+xosgenx~=3.0.5
+xosapi~=3.0.5
+klein~=17.10.0

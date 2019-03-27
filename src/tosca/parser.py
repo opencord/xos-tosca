@@ -1,4 +1,3 @@
-
 # Copyright 2017-present Open Networking Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,23 +12,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from __future__ import absolute_import
 
+import json
 import os
 from tempfile import NamedTemporaryFile
-from xosconfig import Config
-from multistructlog import create_logger
-log = create_logger(Config().get('logging'))
 
-from toscaparser.tosca_template import ToscaTemplate, ValidationError
-from default import TOSCA_RECIPES_DIR
-from grpc_client.resources import RESOURCES
-from grpc_client.models_accessor import GRPCModelsAccessor
 from grpc._channel import _Rendezvous
-import json
-import traceback
+from grpc_client.models_accessor import GRPCModelsAccessor, GRPCModelsException
+from multistructlog import create_logger
+from toscaparser.tosca_template import ToscaTemplate, ValidationError
+from xosconfig import Config
+
+from .default import TOSCA_RECIPES_DIR
+
+log = create_logger(Config().get("logging"))
+
 
 class TOSCA_Parser:
-
     def compute_dependencies(self, template, models_by_name):
         """
         NOTE this method is augmenting self.template, isn't there a more explicit way to achieve it?
@@ -38,18 +38,18 @@ class TOSCA_Parser:
             nodetemplate.dependencies = []
             nodetemplate.dependencies_names = []
             for reqs in nodetemplate.requirements:
-                for (k,v) in reqs.items():
+                for (k, v) in reqs.items():
                     name = v["node"]
-                    if (name in models_by_name):
+                    if name in models_by_name:
                         nodetemplate.dependencies.append(models_by_name[name])
                         nodetemplate.dependencies_names.append(name)
 
                     # go another level deep, as our requirements can have requirements...
                     # NOTE do we still need to go deep?
-                    for sd_req in v.get("requirements",[]):
+                    for sd_req in v.get("requirements", []):
                         for (sd_req_k, sd_req_v) in sd_req.items():
                             name = sd_req_v["node"]
-                            if (name in models_by_name):
+                            if name in models_by_name:
                                 nodetemplate.dependencies.append(models_by_name[name])
                                 nodetemplate.dependencies_names.append(name)
 
@@ -63,8 +63,8 @@ class TOSCA_Parser:
             values = values | set(v.dependencies_names)
 
         all_nodes = list(keys | values)
-        steps = all_nodes
 
+        steps = all_nodes
 
         # Final order
         order = []
@@ -72,26 +72,26 @@ class TOSCA_Parser:
         # DFS stack, not using recursion
         stack = []
 
-        # Unmarked set
-        unmarked = all_nodes
+        # Unmarked set, alpha sorted to provide determinism not present in dicts
+        unmarked = sorted(all_nodes)
 
         # visiting = [] - skip, don't expect 1000s of nodes, |E|/|V| is small
 
         while unmarked:
             stack.insert(0, unmarked[0])  # push first unmarked
 
-            while (stack):
+            while stack:
                 n = stack[0]
                 add = True
                 try:
                     for m in g[n].dependencies_names:
-                        if (m in unmarked):
+                        if m in unmarked:
                             add = False
                             stack.insert(0, m)
                 except KeyError:
                     pass
-                if (add):
-                    if (n in steps and n not in order):
+                if add:
+                    if n in steps and n not in order:
                         order.append(n)
                     item = stack.pop(0)
                     try:
@@ -99,33 +99,39 @@ class TOSCA_Parser:
                     except ValueError:
                         pass
 
-        noorder = list(set(steps) - set(order))
+        # remove ordred items from steps, then alpha sort unordered items (determinism)
+        noorder = sorted(list(set(steps) - set(order)))
         return order + noorder
 
     @staticmethod
     def populate_model(model, data):
-        for k,v in data.iteritems():
+        for key in sorted(data):
             # NOTE must-exists is a TOSCA implementation choice, remove it before saving the model
-            if k != "must-exist":
+            if key != "must-exist":
                 try:
-                    setattr(model, k, v)
-                except TypeError, e:
-                    raise Exception('Failed to set %s on field %s for class %s, Exception was: "%s"' % (v, k, model.model_name, e))
+                    setattr(model, key, data[key])
+                except TypeError as e:
+                    raise Exception(
+                        'Failed to set %s on field %s for class %s, Exception was: "%s"'
+                        % (data[key], key, model.model_name, e)
+                    )
         return model
 
     @staticmethod
     def _translate_exception(msg):
         readable = []
         for line in msg.splitlines():
-            if line.strip().startswith('MissingRequiredFieldError') or \
-                    line.strip().startswith('UnknownFieldError') or \
-                    line.strip().startswith('ImportError') or \
-                    line.strip().startswith('InvalidTypeError') or \
-                    line.strip().startswith('TypeMismatchError'):
+            if (
+                line.strip().startswith("MissingRequiredFieldError")
+                or line.strip().startswith("UnknownFieldError")
+                or line.strip().startswith("ImportError")
+                or line.strip().startswith("InvalidTypeError")
+                or line.strip().startswith("TypeMismatchError")
+            ):
                 readable.append(line)
 
         if len(readable) > 0:
-            return '\n'.join(readable) + '\n'
+            return "\n".join(readable) + "\n"
         else:
             return msg
 
@@ -147,24 +153,24 @@ class TOSCA_Parser:
     @staticmethod
     def populate_dependencies(model, requirements, saved_models):
         for dep in requirements:
-            class_name = dep.keys()[0]
-            related_model = saved_models[dep[class_name]['node']]
+            class_name = list(dep.keys())[0]
+            related_model = saved_models[dep[class_name]["node"]]
             setattr(model, "%s_id" % class_name, related_model.id)
         return model
 
     @staticmethod
     def add_dependencies(data, requirements, saved_models):
         for dep in requirements:
-            class_name = dep.keys()[0]
-            related_model = saved_models[dep[class_name]['node']]
+            class_name = list(dep.keys())[0]
+            related_model = saved_models[dep[class_name]["node"]]
             data["%s_id" % class_name] = related_model.id
         return data
 
     def __init__(self, recipe, username, password, **kwargs):
 
         self.delete = False
-        if 'delete' in kwargs:
-            self.delete = True
+        if "delete" in kwargs:
+            self.delete = kwargs["delete"]
 
         # store username/password combination to read resources
         self.username = username
@@ -187,7 +193,9 @@ class TOSCA_Parser:
 
         try:
             # [] save the recipe to a tmp file
-            with NamedTemporaryFile(delete=False, suffix=".yaml", dir=TOSCA_RECIPES_DIR) as recipe_file:
+            with NamedTemporaryFile(
+                mode="w", delete=False, suffix=".yaml", dir=TOSCA_RECIPES_DIR
+            ) as recipe_file:
                 try:
                     recipe_file.write(self.recipe)
                     recipe_file.close()
@@ -203,49 +211,65 @@ class TOSCA_Parser:
             # [] compute requirements
             self.compute_dependencies(self.template, self.templates_by_model_name)
             # [] topsort requirements
-            self.ordered_models_name = self.topsort_dependencies(self.templates_by_model_name)
+            self.ordered_models_name = self.topsort_dependencies(
+                self.templates_by_model_name
+            )
             # [] topsort templates
-            self.ordered_models_template = self.get_ordered_models_template(self.ordered_models_name, self.templates_by_model_name)
+            self.ordered_models_template = self.get_ordered_models_template(
+                self.ordered_models_name, self.templates_by_model_name
+            )
 
             for recipe in self.ordered_models_template:
                 try:
                     # get properties from tosca
-                    if not 'properties' in recipe.templates[recipe.name]:
+                    if "properties" not in recipe.templates[recipe.name]:
                         data = {}
                     else:
-                        data = recipe.templates[recipe.name]['properties']
-                        if data == None:
+                        data = recipe.templates[recipe.name]["properties"]
+                        if data is None:
                             data = {}
                     # [] get model by class name
                     class_name = recipe.type.replace("tosca.nodes.", "")
 
                     # augemnt data with relations
-                    data = self.add_dependencies(data, recipe.requirements, self.saved_model_by_name)
+                    data = self.add_dependencies(
+                        data, recipe.requirements, self.saved_model_by_name
+                    )
 
-                    model = GRPCModelsAccessor.get_model_from_classname(class_name, data, self.username, self.password)
+                    model = GRPCModelsAccessor.get_model_from_classname(
+                        class_name, data, self.username, self.password
+                    )
                     # [] populate model with data
                     model = self.populate_model(model, data)
                     # [] check if the model has requirements
                     # [] if it has populate them
-                    model = self.populate_dependencies(model, recipe.requirements, self.saved_model_by_name)
+                    model = self.populate_dependencies(
+                        model, recipe.requirements, self.saved_model_by_name
+                    )
                     # [] save, update or delete
 
                     reference_only = False
-                    if 'must-exist' in data:
+                    if "must-exist" in data:
                         reference_only = True
 
                     if self.delete and not model.is_new and not reference_only:
-                        log.info("[XOS-Tosca] Deleting model %s[%s]" % (class_name, model.id))
+                        log.info(
+                            "[XOS-Tosca] Deleting model %s[%s]" % (class_name, model.id)
+                        )
                         model.delete()
                     elif not self.delete:
-                        log.info("[XOS-Tosca] Saving model %s[%s]" % (class_name, model.id))
+                        log.info(
+                            "[XOS-Tosca] Saving model %s[%s]" % (class_name, model.id)
+                        )
                         model.save()
 
-
                     self.saved_model_by_name[recipe.name] = model
-                except Exception, e:
-                    log.exception("[XOS-TOSCA] Failed to save model: %s [%s]" % (class_name, recipe.name))
-                    raise e
+
+                except GRPCModelsException as e:
+                    raise Exception(
+                        "[XOS-TOSCA] Failed to save or delete model %s [%s]: %s"
+                        % (class_name, recipe.name, str(e))
+                    )
 
         except ValidationError as e:
             if e.message:
@@ -254,17 +278,15 @@ class TOSCA_Parser:
                 exception_msg = TOSCA_Parser._translate_exception(str(e))
             raise Exception(exception_msg)
 
-        except _Rendezvous, e:
+        except _Rendezvous as e:
             try:
                 details = json.loads(e._state.details)
                 exception_msg = details["error"]
                 if "specific_error" in details:
-                    exception_msg = "%s: %s" % (exception_msg, details["specific_error"])
+                    exception_msg = "%s: %s" % (
+                        exception_msg,
+                        details["specific_error"],
+                    )
             except Exception:
                 exception_msg = e._state.details
             raise Exception(exception_msg)
-        except Exception, e:
-            log.exception(e)
-            raise Exception(e)
-
-
