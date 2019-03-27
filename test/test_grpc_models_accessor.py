@@ -1,4 +1,3 @@
-
 # Copyright 2017-present Open Networking Foundation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,60 +12,74 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from helpers import *
+from __future__ import absolute_import
+from . import helpers  # noqa: F401
 import unittest
-from mock import patch, MagicMock
+
+try:  # python 3
+    from unittest.mock import patch, MagicMock
+except ImportError:  # python 2
+    from mock import patch, MagicMock
+
 from grpc_client.models_accessor import GRPCModelsAccessor
 from grpc_client.resources import RESOURCES
 from grpc_client.KEYS import TOSCA_KEYS
+
 
 class FakeObj:
     new = None
     filter = None
 
+
 class FakeResource:
     objects = FakeObj
+
 
 class FakeModel:
     pass
 
+
 class FakeExistingModel:
     pass
 
+
 mock_resources = {
-    'username~pass': {
-        'test-model': FakeResource,
-        'single-key': FakeResource,
-        'double-key': FakeResource,
-        'one-of-key': FakeResource
+    "username~pass": {
+        "test-model": FakeResource,
+        "single-key": FakeResource,
+        "double-key": FakeResource,
+        "one-of-key": FakeResource,
     }
 }
 
 mock_keys = {
-    'i-do-not-exists': ['name'],
-    'test-model': ['name'],
-    'empty-key': [],
-    'single-key': ['fake_key'],
-    'double-key': ['key_1', 'key_2'],
-    'one-of-key': ['key_1', ['key_2', 'key_3']],
+    "i-do-not-exists": ["name"],
+    "test-model": ["name"],
+    "empty-key": [],
+    "single-key": ["fake_key"],
+    "double-key": ["key_1", "key_2"],
+    "one-of-key": ["key_1", ["key_2", "key_3"]],
 }
 
-USERNAME = 'username'
-PASSWORD = 'pass'
+USERNAME = "username"
+PASSWORD = "pass"
+
 
 class GRPCModelsAccessor_Create_or_update_Test(unittest.TestCase):
-
     @patch.dict(TOSCA_KEYS, mock_keys, clear=True)
     def test_unkown_user(self):
         """
         [GRPCModelsAccessor] get_model_from_classname: If a user does not have orm classes, raise
         """
-        data = {
-            "name": "test"
-        }
+        data = {"name": "test"}
         with self.assertRaises(Exception) as e:
-            GRPCModelsAccessor.get_model_from_classname('i-do-not-exists', data, USERNAME, PASSWORD)
-        self.assertEqual(e.exception.message, "[XOS-TOSCA] User 'username' does not have ready resources")
+            GRPCModelsAccessor.get_model_from_classname(
+                "i-do-not-exists", data, USERNAME, PASSWORD
+            )
+        self.assertEqual(
+            str(e.exception),
+            "[XOS-TOSCA] User 'username' does not have ready resources",
+        )
 
     @patch.dict(RESOURCES, mock_resources, clear=True)
     @patch.dict(TOSCA_KEYS, mock_keys, clear=True)
@@ -74,47 +87,60 @@ class GRPCModelsAccessor_Create_or_update_Test(unittest.TestCase):
         """
         [GRPCModelsAccessor] get_model_from_classname: If a model is not know by the grpc api, raise
         """
-        data = {
-            "name": "test"
-        }
+        data = {"name": "test"}
         with self.assertRaises(Exception) as e:
-            GRPCModelsAccessor.get_model_from_classname('i-do-not-exists', data, USERNAME, PASSWORD)
-        self.assertEqual(e.exception.message, "[XOS-TOSCA] The model you are trying to create (class: i-do-not-exists, properties, {'name': 'test'}) is not know by xos-core")
+            GRPCModelsAccessor.get_model_from_classname(
+                "i-do-not-exists", data, USERNAME, PASSWORD
+            )
+        self.assertEqual(
+            str(e.exception),
+            "[XOS-TOSCA] The model you are trying to create "
+            "(class: i-do-not-exists, properties, {'name': 'test'}) is not know by xos-core",
+        )
 
     def test_unkown_tosca_key(self):
         """
         [GRPCModelsAccessor] get_model_from_classname: If a model does not have a tosca_key, raise
         """
-        data = {
-            "name": "test"
-        }
+        data = {"name": "test"}
         with self.assertRaises(Exception) as e:
-            GRPCModelsAccessor.get_model_from_classname('no-key', data, USERNAME, PASSWORD)
-        self.assertEqual(e.exception.message, "[XOS-TOSCA] Model no-key doesn't have a tosca_key specified")
+            GRPCModelsAccessor.get_model_from_classname(
+                "no-key", data, USERNAME, PASSWORD
+            )
+        self.assertEqual(
+            str(e.exception),
+            "[XOS-TOSCA] Model no-key doesn't have a tosca_key specified",
+        )
 
     @patch.dict(TOSCA_KEYS, mock_keys, clear=True)
     def test_empty_tosca_key(self):
         """
         [GRPCModelsAccessor] get_model_from_classname: If a model does not have a tosca_key, raise
         """
-        data = {
-            "name": "test"
-        }
+        data = {"name": "test"}
         with self.assertRaises(Exception) as e:
-            GRPCModelsAccessor.get_model_from_classname('empty-key', data, USERNAME, PASSWORD)
-        self.assertEqual(e.exception.message, "[XOS-TOSCA] Model empty-key doesn't have a tosca_key specified")
+            GRPCModelsAccessor.get_model_from_classname(
+                "empty-key", data, USERNAME, PASSWORD
+            )
+        self.assertEqual(
+            str(e.exception),
+            "[XOS-TOSCA] Model empty-key doesn't have a tosca_key specified",
+        )
 
     @patch.dict(TOSCA_KEYS, mock_keys, clear=True)
     def test_tosca_key_are_defined(self):
         """
         [GRPCModelsAccessor] get_model_from_classname: a model should have a property for it's tosca_key
         """
-        data = {
-            "name": "test",
-        }
+        data = {"name": "test"}
         with self.assertRaises(Exception) as e:
-            GRPCModelsAccessor.get_model_from_classname('single-key', data, USERNAME, PASSWORD)
-        self.assertEqual(e.exception.message, "[XOS-TOSCA] Model single-key doesn't have a property for the specified tosca_key ('fake_key')")
+            GRPCModelsAccessor.get_model_from_classname(
+                "single-key", data, USERNAME, PASSWORD
+            )
+        self.assertEqual(
+            str(e.exception),
+            "[XOS-TOSCA] Model single-key doesn't have a property for the specified tosca_key ('fake_key')",
+        )
 
     @patch.object(FakeResource.objects, "filter")
     @patch.object(FakeResource.objects, "new", MagicMock(return_value=FakeModel))
@@ -123,13 +149,11 @@ class GRPCModelsAccessor_Create_or_update_Test(unittest.TestCase):
         """
         [GRPCModelsAccessor] get_model_from_classname: should use a composite key to lookup a model
         """
-        data = {
-            "name": "test",
-            "key_1": "key1",
-            "key_2": "key2"
-        }
+        data = {"name": "test", "key_1": "key1", "key_2": "key2"}
         with patch.dict(RESOURCES, mock_resources, clear=True):
-            model = GRPCModelsAccessor.get_model_from_classname('double-key', data, USERNAME, PASSWORD)
+            model = GRPCModelsAccessor.get_model_from_classname(
+                "double-key", data, USERNAME, PASSWORD
+            )
             mock_filter.assert_called_with(key_1="key1", key_2="key2")
             self.assertEqual(model, FakeModel)
 
@@ -141,23 +165,19 @@ class GRPCModelsAccessor_Create_or_update_Test(unittest.TestCase):
         [GRPCModelsAccessor] get_model_from_classname: should use a composite with one_of key to lookup a model
         """
         # NOTE it should be valid for items with either one of the keys
-        data2 = {
-            "name": "test",
-            "key_1": "key1",
-            "key_2": "key2"
-        }
+        data2 = {"name": "test", "key_1": "key1", "key_2": "key2"}
         with patch.dict(RESOURCES, mock_resources, clear=True):
-            model = GRPCModelsAccessor.get_model_from_classname('one-of-key', data2, USERNAME, PASSWORD)
+            model = GRPCModelsAccessor.get_model_from_classname(
+                "one-of-key", data2, USERNAME, PASSWORD
+            )
             mock_filter.assert_called_with(key_1="key1", key_2="key2")
             self.assertEqual(model, FakeModel)
 
-        data3 = {
-            "name": "test",
-            "key_1": "key1",
-            "key_3": "key3"
-        }
+        data3 = {"name": "test", "key_1": "key1", "key_3": "key3"}
         with patch.dict(RESOURCES, mock_resources, clear=True):
-            model = GRPCModelsAccessor.get_model_from_classname('one-of-key', data3, USERNAME, PASSWORD)
+            model = GRPCModelsAccessor.get_model_from_classname(
+                "one-of-key", data3, USERNAME, PASSWORD
+            )
             mock_filter.assert_called_with(key_1="key1", key_3="key3")
             self.assertEqual(model, FakeModel)
 
@@ -165,13 +185,16 @@ class GRPCModelsAccessor_Create_or_update_Test(unittest.TestCase):
     @patch.object(FakeResource.objects, "new", MagicMock(return_value=FakeModel))
     @patch.dict(TOSCA_KEYS, mock_keys, clear=True)
     def test_one_of_key_error(self, mock_filter):
-        data = {
-            "name": "test",
-            "key_1": "key1"
-        }
+        data = {"name": "test", "key_1": "key1"}
         with self.assertRaises(Exception) as e:
-            GRPCModelsAccessor.get_model_from_classname('one-of-key', data, USERNAME, PASSWORD)
-        self.assertEqual(e.exception.message, "[XOS-TOSCA] Model one-of-key doesn't have a property for the specified tosca_key_one_of (['key_2', 'key_3'])")
+            GRPCModelsAccessor.get_model_from_classname(
+                "one-of-key", data, USERNAME, PASSWORD
+            )
+        self.assertEqual(
+            str(e.exception),
+            "[XOS-TOSCA] Model one-of-key doesn't have a property "
+            "for the specified tosca_key_one_of (['key_2', 'key_3'])",
+        )
 
     @patch.object(FakeResource.objects, "filter")
     @patch.object(FakeResource.objects, "new", MagicMock(return_value=FakeModel))
@@ -180,42 +203,47 @@ class GRPCModelsAccessor_Create_or_update_Test(unittest.TestCase):
         """
         [GRPCModelsAccessor] get_model_from_classname: should create a new model
         """
-        data = {
-            "name": "test",
-            "fake_key": "key"
-        }
+        data = {"name": "test", "fake_key": "key"}
         with patch.dict(RESOURCES, mock_resources, clear=True):
-            model = GRPCModelsAccessor.get_model_from_classname('single-key', data, USERNAME, PASSWORD)
+            model = GRPCModelsAccessor.get_model_from_classname(
+                "single-key", data, USERNAME, PASSWORD
+            )
             mock_filter.assert_called_with(fake_key="key")
             self.assertEqual(model, FakeModel)
 
-    @patch.object(FakeResource.objects, "filter", MagicMock(return_value=[FakeExistingModel]))
+    @patch.object(
+        FakeResource.objects, "filter", MagicMock(return_value=[FakeExistingModel])
+    )
     @patch.dict(TOSCA_KEYS, mock_keys, clear=True)
     def test_existing_model(self):
         """
         [GRPCModelsAccessor] get_model_from_classname: should update an existing model
         """
-        data = {
-            "name": "test",
-            "fake_key": "key"
-        }
+        data = {"name": "test", "fake_key": "key"}
         with patch.dict(RESOURCES, mock_resources, clear=True):
-            model = GRPCModelsAccessor.get_model_from_classname('single-key', data, USERNAME, PASSWORD)
+            model = GRPCModelsAccessor.get_model_from_classname(
+                "single-key", data, USERNAME, PASSWORD
+            )
             self.assertEqual(model, FakeExistingModel)
 
-    @patch.object(FakeResource.objects, "filter", MagicMock(return_value=['a', 'b']))
+    @patch.object(FakeResource.objects, "filter", MagicMock(return_value=["a", "b"]))
     @patch.dict(TOSCA_KEYS, mock_keys, clear=True)
     def test_multiple_models(self):
         """
         [GRPCModelsAccessor] get_model_from_classname: should raise an exception if multiple instances are found
         """
-        data = {
-            "name": "test"
-        }
+        data = {"name": "test"}
         with patch.dict(RESOURCES, mock_resources, clear=True):
             with self.assertRaises(Exception) as e:
-                GRPCModelsAccessor.get_model_from_classname('test-model', data, USERNAME, PASSWORD)
-            self.assertEqual(e.exception.message, "[XOS-Tosca] Model of class test-model and properties {'name': 'test'} has multiple instances, I can't handle it")
+                GRPCModelsAccessor.get_model_from_classname(
+                    "test-model", data, USERNAME, PASSWORD
+                )
+            self.assertEqual(
+                str(e.exception),
+                "[XOS-TOSCA] Model of class test-model and properties "
+                "{'name': 'test'} has multiple instances, I can't handle it",
+            )
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()
