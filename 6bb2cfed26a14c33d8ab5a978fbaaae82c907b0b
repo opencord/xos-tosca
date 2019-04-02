@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "b0edd55b_d58abd11",
+        "filename": "Dockerfile",
+        "patchSetId": 8
+      },
+      "lineNbr": 26,
+      "author": {
+        "id": 1000016
+      },
+      "writtenOn": "2019-04-02T18:15:58Z",
+      "side": 1,
+      "message": "Is it better to do this before copying the code, for layer reuse?",
+      "range": {
+        "startLine": 26,
+        "startChar": 2,
+        "endLine": 26,
+        "endChar": 34
+      },
+      "revId": "6bb2cfed26a14c33d8ab5a978fbaaae82c907b0b",
+      "serverId": "2a2bfe1b-c5c2-48ed-9ac8-16438ab24388",
+      "unresolved": false
+    }
+  ]
+}
