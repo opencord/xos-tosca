@@ -34,9 +34,6 @@ DOCKER_LABEL_VCS_REF     ?= $(shell git diff-index --quiet HEAD -- && git rev-pa
 DOCKER_LABEL_COMMIT_DATE ?= $(shell git diff-index --quiet HEAD -- && git show -s --format=%cd --date=iso-strict HEAD || echo "unknown" )
 DOCKER_LABEL_BUILD_DATE  ?= $(shell date -u "+%Y-%m-%dT%H:%M:%SZ")
 
-## xosgenx related - paths are relative to this directory
-XOS_DIR                  ?= "../xos"
-
 all: test
 
 docker-build: generate-xproto
@@ -102,13 +99,13 @@ generate-xproto: venv-tosca
     --target=src/tosca/xtarget/tosca.xtarget \
     --output=src/tosca/custom_types \
     --write-to-file=target \
-    ${XOS_DIR}/xos/core/models/core.xproto ;\
+    test/test.xproto ;\
 	xosgenx \
     --target=src/tosca/xtarget/tosca_keys.xtarget \
     --output=src/grpc_client/ \
     --write-to-file=single \
     --dest-file=KEYS.py \
-    ${XOS_DIR}/xos/core/models/core.xproto
+    test/test.xproto
 
 clean:
 	find . -name '*.pyc' | xargs rm -f
