@@ -14,7 +14,8 @@
 
 # xosproject/xos-tosca
 
-FROM xosproject/alpine-grpc-base:0.9.0
+ARG BASE_IMAGE=xosproject/alpine-grpc-base:0.9.0
+FROM $BASE_IMAGE
 
 # Set environment variables
 ENV CODE_DEST /opt/xos-tosca
