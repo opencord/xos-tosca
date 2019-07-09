@@ -18,14 +18,15 @@ SHELL = bash -e -o pipefail
 # Variables
 VERSION                  ?= $(shell cat ./VERSION)
 SERVICE_NAME             ?= $(notdir $(abspath .))
-LOADER_NAME              ?= tosca-loader
+SERVICE_NAME_WITH_ARCH   ?= $(shell if [ "$(shell uname -m)" = "aarch64" ] ; then echo "${SERVICE_NAME}-arm64"; else echo "${SERVICE_NAME}"; fi)
+LOADER_NAME              ?= $(shell if [ "$(shell uname -m)" = "aarch64" ] ; then echo "tosca-loader-arm64"; else echo "tosca-loader"; fi)
 
 ## Docker related
 DOCKER_REGISTRY          ?=
 DOCKER_REPOSITORY        ?=
 DOCKER_BUILD_ARGS        ?=
 DOCKER_TAG               ?= ${VERSION}
-DOCKER_IMAGENAME         := ${DOCKER_REGISTRY}${DOCKER_REPOSITORY}${SERVICE_NAME}:${DOCKER_TAG}
+DOCKER_IMAGENAME         := ${DOCKER_REGISTRY}${DOCKER_REPOSITORY}${SERVICE_NAME_WITH_ARCH}:${DOCKER_TAG}
 LOADER_IMAGENAME         := ${DOCKER_REGISTRY}${DOCKER_REPOSITORY}${LOADER_NAME}:${DOCKER_TAG}
 
 ## Docker labels. Only set ref and commit date if committed
@@ -33,6 +34,10 @@ DOCKER_LABEL_VCS_URL     ?= $(shell git remote get-url $(shell git remote))
 DOCKER_LABEL_VCS_REF     ?= $(shell git diff-index --quiet HEAD -- && git rev-parse HEAD || echo "unknown")
 DOCKER_LABEL_COMMIT_DATE ?= $(shell git diff-index --quiet HEAD -- && git show -s --format=%cd --date=iso-strict HEAD || echo "unknown" )
 DOCKER_LABEL_BUILD_DATE  ?= $(shell date -u "+%Y-%m-%dT%H:%M:%SZ")
+
+## Add arm64 platform
+DOCKERFILE_BASEIMAGE     ?= $(shell if [ "$(shell uname -m)" = "aarch64" ] ; then echo "xosproject/alpine-grpc-base-arm64:0.9.0"; else echo "xosproject/alpine-grpc-base:0.9.0"; fi)
+DOCKERBUILD_ARGBASE      ?= $(shell if [ "$(shell uname -m)" = "aarch64" ] ; then echo "--build-arg BASE_IMAGE=${DOCKERFILE_BASEIMAGE}"; else echo ""; fi)
 
 all: test
 
@@ -44,6 +49,7 @@ docker-build: generate-xproto
     --build-arg org_label_schema_vcs_ref="${DOCKER_LABEL_VCS_REF}" \
     --build-arg org_label_schema_build_date="${DOCKER_LABEL_BUILD_DATE}" \
     --build-arg org_opencord_vcs_commit_date="${DOCKER_LABEL_COMMIT_DATE}" \
+    ${DOCKERBUILD_ARGBASE} \
     -f Dockerfile .
 	docker build $(DOCKER_BUILD_ARGS) \
     -t ${LOADER_IMAGENAME} \
